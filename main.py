@@ -11,22 +11,7 @@ import cv2
 
 import mediapipe as mp
 import numpy as np
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1080, 1080)
-        self.centralWidget = QtWidgets.QWidget(MainWindow)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.centralWidget.sizePolicy().hasHeightForWidth())
-        self.centralWidget.setSizePolicy(sizePolicy)
-        self.centralWidget.setObjectName("centralWidget")
-
-
-
-
-class Window(QMainWindow, Ui_MainWindow):
+class Window(QMainWindow):
     def __init__(self):
         super().__init__()
         # Window properties
