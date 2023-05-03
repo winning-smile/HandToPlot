@@ -1,32 +1,46 @@
 import sys
-import os
 from CamThread import *
-from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
-from PyQt5.QtMultimedia import *
-from PyQt5.QtMultimediaWidgets import *
-from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5 import QtCore, QtGui
-import cv2
-import mediapipe as mp
-import numpy as np
+from PyQt5 import QtCore
+import sys
+from PyQt5.QtWidgets import QDialog, QApplication, QPushButton, QVBoxLayout
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import matplotlib.pyplot as plt
+import random
 
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
         # Window properties
         self.setWindowTitle("UI_Plot")
-        self.resize(1080, 1080)
+        self.resize(1920, 1080)
+        layout = QHBoxLayout()
 
         # Окно куда выводить изображение с видеокамеры
         self.label = QLabel()
-        self.setCentralWidget(self.label)
+        #self.setCentralWidget(self.label)
 
         # Создаём процесс для видеокамеры
         self.camera = handDetector()
         self.camera.changePixmap.connect(self.setImage)
         self.camera.start()
+
+        # Create the maptlotlib FigureCanvas object,
+        self.figure = plt.figure()
+        self.canvas = FigureCanvas(self.figure)
+
+        layout.addWidget(self.label)
+        layout.addWidget(self.canvas)
+
+        # Слой для вёрстки
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+        #self.setLayout(layout)
+
+
 
 
     @QtCore.pyqtSlot(QImage)
