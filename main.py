@@ -28,9 +28,17 @@ class Window(QMainWindow):
         self.camera.start()
 
         # Create the maptlotlib FigureCanvas object,
+        self.ginfo = "clear"
         self.figure = plt.figure()
         self.canvas = FigureCanvas(self.figure)
 
+        self.button = QPushButton('Plot')
+
+        # adding action to the button
+        self.button.clicked.connect(self.plot)
+
+
+        layout.addWidget(self.button)
         layout.addWidget(self.label)
         layout.addWidget(self.canvas)
 
@@ -55,6 +63,35 @@ class Window(QMainWindow):
         if reply == QMessageBox.Yes:
             self.camera.stop()
             event.accept()
+
+    def graph_database(self, signal):
+        if signal == "cubic":
+            self.ginfo = "cubic"
+        elif signal == "quadro":
+            self.ginfo = "quadro"
+        elif signal == "sin":
+            self.ginfo = "sin"
+        elif signal == "cos":
+            self.ginfo = "cos"
+        elif signal == "circle":
+            self.ginfo = "circle"
+        elif signal == "clear":
+            self.ginfo = "clear"
+
+        #self.plot(self, self.ginfo)
+
+    # action called by the push button
+    def plot(self):
+        # random data
+        data = [i*i for i in range(-10, 11, 1)]
+        # clearing old figure
+        self.figure.clear()
+        # create an axis
+        ax = self.figure.add_subplot(111)
+        # plot data
+        ax.plot(data, '*-')
+        # refresh canvas
+        self.canvas.draw()
 
 
 if __name__ == "__main__":
