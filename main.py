@@ -76,7 +76,17 @@ class Window(QMainWindow):
 
     # action called by the push button
     def plot(self, signal):
+        if signal == "cubic":
+            self.figure.clear()
+            data = [i**2 for i in range(-10, 11, 1)]
+        if signal == "quadro":
+            self.figure.clear()
+            data = [i**3 for i in range(-10, 11, 1)]
+        if signal == "sin":
+            self.figure.clear()
+            data = [np.sin(i) for i in range(-10, 11, 1)]
         if signal == "cos":
+            self.figure.clear()
             data = [np.cos(i) for i in range(-10, 11, 1)]
         # create an axis
         ax = self.figure.add_subplot(111)

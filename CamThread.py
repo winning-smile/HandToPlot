@@ -51,13 +51,27 @@ class handDetector(QThread):
             tmparr.append(lmlist[i][1])
 
          flag = all(elem > 450 for elem in tmparr)
-         if flag:
-            #print(math.hypot(lmlist[4][1] - lmlist[12][1], lmlist[4][2] - lmlist[12][2]))
-            if (math.hypot(lmlist[4][1] - lmlist[12][1], lmlist[4][2] - lmlist[12][2]) < 10) and (lmlist[8][2] < lmlist[12][2]):
-               self.graph.emit("cos")
-            if (lmlist[4][2] < lmlist[8][2]) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]):
-               self.graph.emit("clear")
+         tmparr = []
 
+         if flag:
+            # парабола done
+            if (math.hypot(lmlist[4][1] - lmlist[14][1], lmlist[4][2] - lmlist[14][2]) < 10) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[12][2] < lmlist[16][2]) and (lmlist[12][2] < lmlist[20][2]):
+               self.graph.emit("cubic")
+            # гипербола done
+            elif (math.hypot(lmlist[4][1] - lmlist[18][1], lmlist[4][2] - lmlist[18][2]) < 10) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[12][2] < lmlist[20][2]) and (lmlist[16][2] < lmlist[20][2]):
+               self.graph.emit("quadro")
+            # синус done
+            elif (math.hypot(lmlist[4][1] - lmlist[5][1], lmlist[4][2] - lmlist[5][2]) < 20) and (lmlist[8][2] < lmlist[12][2]) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]):
+               self.graph.emit("sin")
+            # косинус done
+            elif (math.hypot(lmlist[4][1] - lmlist[12][1], lmlist[4][2] - lmlist[12][2]) < 10) and (lmlist[8][2] < lmlist[12][2]):
+               self.graph.emit("cos")
+            # круг done
+            #if (math.hypot(lmlist[4][1] - lmlist[8][1], lmlist[4][2] - lmlist[8][2]) < 10) and (lmlist[12][2] < lmlist[8][2]):
+               #self.graph.emit("circle")
+            # очистка done
+            elif (lmlist[4][2] < lmlist[8][2]) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]):
+               self.graph.emit("clear")
 
 
    def start_capture(self):
