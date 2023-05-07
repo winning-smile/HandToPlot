@@ -16,6 +16,7 @@ class Window(QMainWindow):
         # Window properties
         self.setWindowTitle("UI_Plot")
         self.resize(1920, 1080)
+        self.graphtype = ""
         layout = QHBoxLayout()
 
         # Окно куда выводить изображение с видеокамеры
@@ -25,20 +26,21 @@ class Window(QMainWindow):
         # Создаём процесс для видеокамеры
         self.camera = handDetector()
         self.camera.changePixmap.connect(self.setImage)
+        self.camera.graph.connect(self.setGraph)
         self.camera.start()
 
         # Create the maptlotlib FigureCanvas object,
-        self.ginfo = "clear"
         self.figure = plt.figure()
         self.canvas = FigureCanvas(self.figure)
+        #self.canvas.graph.connect(self.setGraph)
 
-        self.button = QPushButton('Plot')
+      #  self.button = QPushButton('Plot')
 
         # adding action to the button
-        self.button.clicked.connect(self.plot)
+        #self.button.clicked.connect(self.plot)
 
 
-        layout.addWidget(self.button)
+       # layout.addWidget(self.button)
         layout.addWidget(self.label)
         layout.addWidget(self.canvas)
 
@@ -55,6 +57,13 @@ class Window(QMainWindow):
     def setImage(self, qImg1):
         self.label.setPixmap(QPixmap.fromImage(qImg1))
 
+    @QtCore.pyqtSlot(str)
+    def setGraph(self, value):
+        if value == "clear":
+            self.clear_canvas()
+        else:
+            self.plot(value)
+
     def closeEvent(self, event):
         reply = QMessageBox.question(QMessageBox, 'Выход',
                                      "Вы уверены, что хотите закрыть программу?",
@@ -64,28 +73,11 @@ class Window(QMainWindow):
             self.camera.stop()
             event.accept()
 
-    def graph_database(self, signal):
-        if signal == "cubic":
-            self.ginfo = "cubic"
-        elif signal == "quadro":
-            self.ginfo = "quadro"
-        elif signal == "sin":
-            self.ginfo = "sin"
-        elif signal == "cos":
-            self.ginfo = "cos"
-        elif signal == "circle":
-            self.ginfo = "circle"
-        elif signal == "clear":
-            self.ginfo = "clear"
-
-        #self.plot(self, self.ginfo)
 
     # action called by the push button
-    def plot(self):
-        # random data
-        data = [i*i for i in range(-10, 11, 1)]
-        # clearing old figure
-        self.figure.clear()
+    def plot(self, signal):
+        if signal == "cos":
+            data = [np.cos(i) for i in range(-10, 11, 1)]
         # create an axis
         ax = self.figure.add_subplot(111)
         # plot data
@@ -93,6 +85,9 @@ class Window(QMainWindow):
         # refresh canvas
         self.canvas.draw()
 
+    def clear_canvas(self):
+        self.figure.clear()
+        self.canvas.draw()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
