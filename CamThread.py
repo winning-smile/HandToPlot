@@ -10,7 +10,6 @@ import qimage2ndarray
 class handDetector(QThread):
    changePixmap = pyqtSignal(QImage)
    changePixmap2 = pyqtSignal(QImage)
-   changePixmap3 = pyqtSignal(QImage)
    graph = pyqtSignal(str)
 
    def __init__(self, mode=False, maxHands=1, detectionCon=1, trackCon=0.5):
@@ -25,14 +24,11 @@ class handDetector(QThread):
       self.mpDraw = mp.solutions.drawing_utils
       self.signal = "clear"
       self.back = cv2.imread('test3.png')
-      #self.timer = QTimer(self)
-      #self.timer.timeout.connect(self.backToOriginal)
-      #self.timer.start(1000)
 
+   # Модель находит на каждом кадре скелет руки и возвращает изображение с нарисованным скелетом
    def findHands(self, img, draw=True):
       imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
       self.results = self.hands.process(imgRGB)
-      self.lmList = []
 
       if self.results.multi_hand_landmarks:
          for handLms in self.results.multi_hand_landmarks:
@@ -40,6 +36,7 @@ class handDetector(QThread):
                self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
       return img
 
+   # Возвращает массив координат всех опорных точек
    def findPosition(self, img, handNo=0, draw=True):
       self.lmList = []
       if self.results.multi_hand_landmarks:
@@ -51,6 +48,7 @@ class handDetector(QThread):
 
       return self.lmList
 
+   # Функция детекции жестов для построения графиков
    def on_build(self, lmlist):
       tmparr = []
       if lmlist:
@@ -80,30 +78,29 @@ class handDetector(QThread):
             elif (lmlist[4][2] < lmlist[8][2]) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]):
                self.graph.emit("clear")
 
+   # Транслятор движений руки с канала видеокамеры на верхний слой
    def translator(self, lmlist):
+      # Делаем копию оригинального фона
       self.cache = self.back.copy()
+
       if lmlist:
          for elem in lmlist:
+            # Рисуем круг на каждой опорной точке
             cv2.circle(self.cache, (elem[1], elem[2]), 10, (255, 0, 255), cv2.FILLED)
 
+      # Преобразуем массив значений в формат QImage
       self.cache = cv2.cvtColor(self.cache, cv2.COLOR_BGR2RGB)
       height, width, channel = self.cache.shape
       bytesPerLine = 3 * width
       qImg = QImage(self.cache.data, width, height, bytesPerLine, QImage.Format_RGB888)
+      # Отправляем скомпонованное изображение в UI
       self.changePixmap2.emit(qImg)
 
-
-   def backToOriginal(self):
-      print("yes")
-      back = self.imaget3
-      height2, width2, channel2 = back.shape
-      step2 = channel2 * width2
-      qImg2 = QImage(back.data, width2, height2, step2, QImage.Format_RGB888)
-      self.changePixmap3.emit(qImg2)
-
+   # Начало работы видеокамеры
    def start_capture(self):
       self.cap1 = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
+   # Конец работы видеокамеры
    def stop_capture(self):
       if self.cap1:
          self.cap1.release()
@@ -111,10 +108,6 @@ class handDetector(QThread):
 
    def run(self):
       self.start_capture()
-      #self.cap1.set(3, 240)
-      #self.cap1.set(4, 240)
-      #self.cap1.set(5, 30)
-
       while True:
          ret1, image1 = self.cap1.read()
          if ret1:
@@ -126,7 +119,3 @@ class handDetector(QThread):
             step1 = channel1 * width1
             qImg1 = QImage(im1.data, width1, height1, step1, QImage.Format_RGB888)
             self.changePixmap.emit(qImg1)
-
-   def stop(self):
-      self.stop_capture(self)
-      super().stop()

@@ -17,17 +17,11 @@ class Window(QMainWindow):
         # Window properties
         self.setWindowTitle("UI_Plot")
         self.resize(1920, 1080)
-        #self.setFixedSize(self, 1)
 
         widget = QWidget()
         self.setCentralWidget(widget)
-        # Обёртка сверху
-        #self.background = QLabel()
-        #backgroundImg = QPixmap('test2.png')
-        #self.background.setPixmap(backgroundImg)
-        #self.resize(backgroundImg.width(), backgroundImg.height())
 
-        # Окно куда выводить изображение с видеокамеры
+        # Слой куда выводить изображение с видеокамеры
         self.label = QLabel()
         self.label2 = QLabel(widget)
         backgroundImg2 = QPixmap('test3.png')
@@ -39,7 +33,6 @@ class Window(QMainWindow):
         self.camera.changePixmap.connect(self.setImage)
         #self.camera.graph.connect(self.setGraph)
         self.camera.changePixmap2.connect(self.setImage2)
-        #self.camera.changePixmap3.connect(self.setImage2)
         self.camera.start()
 
         layout = QHBoxLayout()
@@ -47,27 +40,9 @@ class Window(QMainWindow):
         widget.setLayout(layout)
         layout.addWidget(self.label)
 
-        #self.image2 = QLabel(widget)
-        #backgroundImg2 = QPixmap('test3.png')
-        #self.image2.setPixmap(backgroundImg2)
-        #self.image2.setFixedSize(backgroundImg2.size())
-
         # Create the maptlotlib FigureCanvas object
         #self.figure = plt.figure()
         #self.canvas = FigureCanvas(self.figure)
-
-       #layout.addWidget(self.background)
-        #layout.addWidget(self.label)
-        #layout.addWidget(self.canvas)
-
-        # Слой для вёрстки
-
-        #widget.setLayout(layout)
-        #self.setCentralWidget(widget)
-        #self.setLayout(layout)
-
-
-
 
     @QtCore.pyqtSlot(QImage)
     def setImage(self, qImg1):
@@ -93,8 +68,6 @@ class Window(QMainWindow):
             self.camera.stop()
             event.accept()
 
-
-    # action called by the push button
     def plot(self, signal):
         if signal == "cubic":
             self.figure.clear()
