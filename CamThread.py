@@ -24,8 +24,7 @@ class handDetector(QThread):
       self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.detectionCon, self.trackCon)
       self.mpDraw = mp.solutions.drawing_utils
       self.signal = "clear"
-      self.imaget2 = cv2.cvtColor(cv2.imread('test3.png'), cv2.COLOR_BGR2RGB)
-      self.imaget3 = cv2.cvtColor(cv2.imread('test3.png'), cv2.COLOR_BGR2RGB)
+      self.back = cv2.imread('test3.png')
       #self.timer = QTimer(self)
       #self.timer.timeout.connect(self.backToOriginal)
       #self.timer.start(1000)
@@ -82,24 +81,16 @@ class handDetector(QThread):
                self.graph.emit("clear")
 
    def translator(self, lmlist):
-      img = self.imaget2
-      #height, width, channel = img.shape
-      #step = channel * width
-      #qImg = QImage(img.data, img.shape[1], img.shape[0], img.shape[2], QImage.Format_RGB888)
-      #cache = qImg.copy()
-      #cache = qimage2ndarray.rgb_view(cache)
-
+      self.cache = self.back.copy()
       if lmlist:
          for elem in lmlist:
-            #cv2.circle(cache, (elem[1], elem[2]), 20, (100, 50, 100), cv2.FILLED)
-            cv2.circle(img, (elem[1], elem[2]), 20, (100, 50, 100), cv2.FILLED)
+            cv2.circle(self.cache, (elem[1], elem[2]), 10, (255, 0, 255), cv2.FILLED)
 
-      #qImg1 = QImage(cache.data, cache.shape[1], cache.shape[0], cache.shape[1], QImage.Format_RGB888)
-      height, width, channel = img.shape
-      step = channel * width
-      qImg1 = QImage(img.data, width, height, step, QImage.Format_RGB888)
-      #img = cache
-      self.changePixmap2.emit(qImg1)
+      self.cache = cv2.cvtColor(self.cache, cv2.COLOR_BGR2RGB)
+      height, width, channel = self.cache.shape
+      bytesPerLine = 3 * width
+      qImg = QImage(self.cache.data, width, height, bytesPerLine, QImage.Format_RGB888)
+      self.changePixmap2.emit(qImg)
 
 
    def backToOriginal(self):
