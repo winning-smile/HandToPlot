@@ -91,9 +91,13 @@ class handDetector(QThread):
 
       if lmlist:
          for elem in lmlist:
-            cv2.circle(cache, (elem[1], elem[2]), 20, (100, 50, 100), cv2.FILLED)
+            #cv2.circle(cache, (elem[1], elem[2]), 20, (100, 50, 100), cv2.FILLED)
+            cv2.circle(img, (elem[1], elem[2]), 20, (100, 50, 100), cv2.FILLED)
 
-      qImg1 = QImage(cache.data, cache.shape[1], cache.shape[0], cache.shape[1], QImage.Format_RGB888)
+      #qImg1 = QImage(cache.data, cache.shape[1], cache.shape[0], cache.shape[1], QImage.Format_RGB888)
+      height, width, channel = img.shape
+      step = channel * width
+      qImg1 = QImage(img.data, width, height, step, QImage.Format_RGB888)
       #img = cache
       self.changePixmap2.emit(qImg1)
 

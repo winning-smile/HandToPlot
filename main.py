@@ -39,7 +39,7 @@ class Window(QMainWindow):
         self.camera.changePixmap.connect(self.setImage)
         #self.camera.graph.connect(self.setGraph)
         self.camera.changePixmap2.connect(self.setImage2)
-        self.camera.changePixmap3.connect(self.setImage2)
+        #self.camera.changePixmap3.connect(self.setImage2)
         self.camera.start()
 
         layout = QHBoxLayout()
