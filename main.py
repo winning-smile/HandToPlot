@@ -10,44 +10,60 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import matplotlib.pyplot as plt
 import random
 
+
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
         # Window properties
         self.setWindowTitle("UI_Plot")
         self.resize(1920, 1080)
-        self.graphtype = ""
-        layout = QHBoxLayout()
+        #self.setFixedSize(self, 1)
+
+        widget = QWidget()
+        self.setCentralWidget(widget)
+        # Обёртка сверху
+        #self.background = QLabel()
+        #backgroundImg = QPixmap('test2.png')
+        #self.background.setPixmap(backgroundImg)
+        #self.resize(backgroundImg.width(), backgroundImg.height())
 
         # Окно куда выводить изображение с видеокамеры
         self.label = QLabel()
-        #self.setCentralWidget(self.label)
+        self.label2 = QLabel(widget)
+        backgroundImg2 = QPixmap('test3.png')
+        self.label2.setPixmap(backgroundImg2)
+        self.label2.setFixedSize(backgroundImg2.size())
 
-        # Создаём процесс для видеокамеры
+        #Создаём процесс для видеокамеры
         self.camera = handDetector()
         self.camera.changePixmap.connect(self.setImage)
-        self.camera.graph.connect(self.setGraph)
+        #self.camera.graph.connect(self.setGraph)
+        self.camera.changePixmap2.connect(self.setImage2)
+        self.camera.changePixmap3.connect(self.setImage2)
         self.camera.start()
 
-        # Create the maptlotlib FigureCanvas object,
-        self.figure = plt.figure()
-        self.canvas = FigureCanvas(self.figure)
-        #self.canvas.graph.connect(self.setGraph)
-
-      #  self.button = QPushButton('Plot')
-
-        # adding action to the button
-        #self.button.clicked.connect(self.plot)
-
-
-       # layout.addWidget(self.button)
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        widget.setLayout(layout)
         layout.addWidget(self.label)
-        layout.addWidget(self.canvas)
+
+        #self.image2 = QLabel(widget)
+        #backgroundImg2 = QPixmap('test3.png')
+        #self.image2.setPixmap(backgroundImg2)
+        #self.image2.setFixedSize(backgroundImg2.size())
+
+        # Create the maptlotlib FigureCanvas object
+        #self.figure = plt.figure()
+        #self.canvas = FigureCanvas(self.figure)
+
+       #layout.addWidget(self.background)
+        #layout.addWidget(self.label)
+        #layout.addWidget(self.canvas)
 
         # Слой для вёрстки
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
+
+        #widget.setLayout(layout)
+        #self.setCentralWidget(widget)
         #self.setLayout(layout)
 
 
@@ -56,6 +72,10 @@ class Window(QMainWindow):
     @QtCore.pyqtSlot(QImage)
     def setImage(self, qImg1):
         self.label.setPixmap(QPixmap.fromImage(qImg1))
+
+    @QtCore.pyqtSlot(QImage)
+    def setImage2(self, qImg2):
+        self.label2.setPixmap(QPixmap.fromImage(qImg2))
 
     @QtCore.pyqtSlot(str)
     def setGraph(self, value):

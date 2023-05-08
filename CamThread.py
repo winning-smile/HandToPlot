@@ -1,12 +1,16 @@
-from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QTime
 from PyQt5.QtGui import QImage, QPixmap
+import PyQt5.QtGui
 import numpy as np
 import mediapipe as mp
 import cv2
 import math
+import qimage2ndarray
 
 class handDetector(QThread):
    changePixmap = pyqtSignal(QImage)
+   changePixmap2 = pyqtSignal(QImage)
+   changePixmap3 = pyqtSignal(QImage)
    graph = pyqtSignal(str)
 
    def __init__(self, mode=False, maxHands=1, detectionCon=1, trackCon=0.5):
@@ -20,6 +24,11 @@ class handDetector(QThread):
       self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.detectionCon, self.trackCon)
       self.mpDraw = mp.solutions.drawing_utils
       self.signal = "clear"
+      self.imaget2 = cv2.cvtColor(cv2.imread('test3.png'), cv2.COLOR_BGR2RGB)
+      self.imaget3 = cv2.cvtColor(cv2.imread('test3.png'), cv2.COLOR_BGR2RGB)
+      #self.timer = QTimer(self)
+      #self.timer.timeout.connect(self.backToOriginal)
+      #self.timer.start(1000)
 
    def findHands(self, img, draw=True):
       imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -40,7 +49,6 @@ class handDetector(QThread):
             h, w, c = img.shape
             cx, cy = int(lm.x * w), int(lm.y * h)
             self.lmList.append([id, cx, cy])
-            #print(id, cx, cy)
 
       return self.lmList
 
@@ -73,6 +81,30 @@ class handDetector(QThread):
             elif (lmlist[4][2] < lmlist[8][2]) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]):
                self.graph.emit("clear")
 
+   def translator(self, lmlist):
+      img = self.imaget2
+      #height, width, channel = img.shape
+      #step = channel * width
+      #qImg = QImage(img.data, img.shape[1], img.shape[0], img.shape[2], QImage.Format_RGB888)
+      #cache = qImg.copy()
+      #cache = qimage2ndarray.rgb_view(cache)
+
+      if lmlist:
+         for elem in lmlist:
+            cv2.circle(cache, (elem[1], elem[2]), 20, (100, 50, 100), cv2.FILLED)
+
+      qImg1 = QImage(cache.data, cache.shape[1], cache.shape[0], cache.shape[1], QImage.Format_RGB888)
+      #img = cache
+      self.changePixmap2.emit(qImg1)
+
+
+   def backToOriginal(self):
+      print("yes")
+      back = self.imaget3
+      height2, width2, channel2 = back.shape
+      step2 = channel2 * width2
+      qImg2 = QImage(back.data, width2, height2, step2, QImage.Format_RGB888)
+      self.changePixmap3.emit(qImg2)
 
    def start_capture(self):
       self.cap1 = cv2.VideoCapture(0, cv2.CAP_DSHOW)
@@ -87,12 +119,14 @@ class handDetector(QThread):
       #self.cap1.set(3, 240)
       #self.cap1.set(4, 240)
       #self.cap1.set(5, 30)
+
       while True:
          ret1, image1 = self.cap1.read()
          if ret1:
             im1 = cv2.cvtColor(self.findHands(image1), cv2.COLOR_BGR2RGB)
             lmList = self.findPosition(image1)
-            self.on_build(lmList)
+            #self.on_build(lmList)
+            self.translator(lmList)
             height1, width1, channel1 = im1.shape
             step1 = channel1 * width1
             qImg1 = QImage(im1.data, width1, height1, step1, QImage.Format_RGB888)
