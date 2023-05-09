@@ -5,7 +5,6 @@ import numpy as np
 import mediapipe as mp
 import cv2
 import math
-import qimage2ndarray
 
 class handDetector(QThread):
    changePixmap = pyqtSignal(QImage)
@@ -23,7 +22,7 @@ class handDetector(QThread):
       self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.detectionCon, self.trackCon)
       self.mpDraw = mp.solutions.drawing_utils
       self.signal = "clear"
-      self.back = cv2.imread('test3.png')
+      self.back = cv2.imread('back.png', cv2.IMREAD_UNCHANGED)
 
    # Модель находит на каждом кадре скелет руки и возвращает изображение с нарисованным скелетом
    def findHands(self, img, draw=True):
@@ -86,13 +85,13 @@ class handDetector(QThread):
       if lmlist:
          for elem in lmlist:
             # Рисуем круг на каждой опорной точке
-            cv2.circle(self.cache, (elem[1], elem[2]), 10, (255, 0, 255), cv2.FILLED)
+            cv2.circle(self.cache, (elem[1], elem[2]), 10, (50, 0, 255, 255), cv2.FILLED)
 
       # Преобразуем массив значений в формат QImage
-      self.cache = cv2.cvtColor(self.cache, cv2.COLOR_BGR2RGB)
+      self.cache = cv2.cvtColor(self.cache, cv2.COLOR_BGR2RGBA)
       height, width, channel = self.cache.shape
-      bytesPerLine = 3 * width
-      qImg = QImage(self.cache.data, width, height, bytesPerLine, QImage.Format_RGB888)
+      bytesPerLine = channel * width
+      qImg = QImage(self.cache.data, width, height, bytesPerLine, QImage.Format_RGBA8888)
       # Отправляем скомпонованное изображение в UI
       self.changePixmap2.emit(qImg)
 
@@ -113,7 +112,7 @@ class handDetector(QThread):
          if ret1:
             im1 = cv2.cvtColor(self.findHands(image1), cv2.COLOR_BGR2RGB)
             lmList = self.findPosition(image1)
-            #self.on_build(lmList)
+            self.on_build(lmList)
             self.translator(lmList)
             height1, width1, channel1 = im1.shape
             step1 = channel1 * width1

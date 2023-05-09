@@ -6,9 +6,13 @@ from PyQt5 import QtCore
 import sys
 from PyQt5.QtWidgets import QDialog, QApplication, QPushButton, QVBoxLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
+import matplotlib
 import random
+
+matplotlib.use('Qt5Agg')
 
 
 class Window(QMainWindow):
@@ -16,41 +20,60 @@ class Window(QMainWindow):
         super().__init__()
         # Window properties
         self.setWindowTitle("UI_Plot")
-        self.resize(1920, 1080)
+        self.setGeometry(100, 100, 600, 400)
+        self.showMaximized()
+        self.opacity_effect = QGraphicsOpacityEffect()
+        self.opacity_effect.setOpacity(0.3)
 
         widget = QWidget()
         self.setCentralWidget(widget)
 
+        # Сетка
+        self.grid = QGridLayout()
+
         # Слой куда выводить изображение с видеокамеры
-        self.label = QLabel()
-        self.label2 = QLabel(widget)
-        backgroundImg2 = QPixmap('test3.png')
-        self.label2.setPixmap(backgroundImg2)
-        self.label2.setFixedSize(backgroundImg2.size())
+        self.CameraOutput = QLabel()
 
-        #Создаём процесс для видеокамеры
-        self.camera = handDetector()
-        self.camera.changePixmap.connect(self.setImage)
-        #self.camera.graph.connect(self.setGraph)
-        self.camera.changePixmap2.connect(self.setImage2)
-        self.camera.start()
+        # Создаём процесс для видеокамеры
+        self.Camera = handDetector()
+        self.Camera.changePixmap.connect(self.setImage)
+        self.Camera.graph.connect(self.setGraph)
+        self.Camera.changePixmap2.connect(self.setImage2)
+        self.Camera.start()
 
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        widget.setLayout(layout)
-        layout.addWidget(self.label)
+        # Слой для отображения графиков
+        self.figure = Figure(figsize=(14, 10), dpi=100)
+        self.canvas = FigureCanvas(self.figure)
 
-        # Create the maptlotlib FigureCanvas object
-        #self.figure = plt.figure()
-        #self.canvas = FigureCanvas(self.figure)
+        # Слой куда транслировать скелет руки
+        self.TranslatorOutput = QLabel()
+        backgroundImg = QPixmap('test3.png')
+        self.TranslatorOutput.setPixmap(backgroundImg)
+
+        #self.TranslatorOutput.setFixedSize(backgroundImg.size())
+        #self.TranslatorOutput.raise_()
+        #self.TranslatorOutput.setGraphicsEffect(self.opacity_effect)
+
+        self.but = QPushButton()
+        self.but.clicked.connect(self.plot2)
+
+        # Вёрстка
+        widget.setLayout(self.grid)
+        self.grid.addWidget(self.but, 0, 1)
+        self.grid.addWidget(self.CameraOutput, 0, 3)
+
+        self.grid.addWidget(self.canvas, 0, 0, alignment=QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.TranslatorOutput, 0, 0,  alignment=QtCore.Qt.AlignCenter)
+        self.setLayout(self.grid)
+
 
     @QtCore.pyqtSlot(QImage)
     def setImage(self, qImg1):
-        self.label.setPixmap(QPixmap.fromImage(qImg1))
+        self.CameraOutput.setPixmap(QPixmap.fromImage(qImg1))
 
     @QtCore.pyqtSlot(QImage)
     def setImage2(self, qImg2):
-        self.label2.setPixmap(QPixmap.fromImage(qImg2))
+        self.TranslatorOutput.setPixmap(QPixmap.fromImage(qImg2))
 
     @QtCore.pyqtSlot(str)
     def setGraph(self, value):
@@ -81,6 +104,16 @@ class Window(QMainWindow):
         if signal == "cos":
             self.figure.clear()
             data = [np.cos(i) for i in range(-10, 11, 1)]
+        # create an axis
+        ax = self.figure.add_subplot(111)
+        # plot data
+        ax.plot(data, '*-')
+        # refresh canvas
+        self.canvas.draw()
+
+    def plot2(self):
+        self.figure.clear()
+        data = [np.cos(i) for i in range(-10, 11, 1)]
         # create an axis
         ax = self.figure.add_subplot(111)
         # plot data
