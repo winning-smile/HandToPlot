@@ -54,12 +54,8 @@ class Window(QMainWindow):
         background_img = QPixmap('back.png')
         self.translator_out.setPixmap(background_img)
 
-        self.but = QPushButton()
-        self.but.clicked.connect(self.plot2)
-
         # Вёрстка
         widget.setLayout(self.grid)
-        #self.grid.addWidget(self.but, 0, 1)
         self.grid.addWidget(self.mode_label, 1, 1)
         self.grid.addWidget(self.camera_out, 0, 1)
         self.grid.addWidget(self.canvas, 0, 0, alignment=QtCore.Qt.AlignCenter)
@@ -77,7 +73,7 @@ class Window(QMainWindow):
 
     @QtCore.pyqtSlot(bool)
     def set_mode(self, bool_value):
-        if bool_value:
+        if not bool_value:
             self.mode_label.setText('Режим: Изменение')
         else:
             self.mode_label.setText('Режим: Построение')
