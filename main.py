@@ -1,7 +1,7 @@
 import sys
 from CamThread import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap, QFont
 from PyQt5 import QtCore
 import sys
 from PyQt5.QtWidgets import QDialog, QApplication, QPushButton, QVBoxLayout
@@ -10,6 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib import rc
 import random
 
 matplotlib.use('Qt5Agg')
@@ -22,8 +23,6 @@ class Window(QMainWindow):
         self.setWindowTitle("UI_Plot")
         self.setGeometry(100, 100, 600, 400)
         self.showMaximized()
-        self.opacity_effect = QGraphicsOpacityEffect()
-        self.opacity_effect.setOpacity(0.3)
 
         widget = QWidget()
         self.setCentralWidget(widget)
@@ -34,11 +33,16 @@ class Window(QMainWindow):
         # Слой куда выводить изображение с видеокамеры
         self.CameraOutput = QLabel()
 
+        # Индикатор режима работы
+        self.ModeLabel = QLabel()
+        self.ModeLabel.setText('Режим: Построение')
+
         # Создаём процесс для видеокамеры
         self.Camera = handDetector()
         self.Camera.changePixmap.connect(self.setImage)
         self.Camera.graph.connect(self.setGraph)
         self.Camera.changePixmap2.connect(self.setImage2)
+        self.Camera.change_mode.connect(self.set_mode)
         self.Camera.start()
 
         # Слой для отображения графиков
@@ -47,21 +51,17 @@ class Window(QMainWindow):
 
         # Слой куда транслировать скелет руки
         self.TranslatorOutput = QLabel()
-        backgroundImg = QPixmap('test3.png')
+        backgroundImg = QPixmap('back.png')
         self.TranslatorOutput.setPixmap(backgroundImg)
-
-        #self.TranslatorOutput.setFixedSize(backgroundImg.size())
-        #self.TranslatorOutput.raise_()
-        #self.TranslatorOutput.setGraphicsEffect(self.opacity_effect)
 
         self.but = QPushButton()
         self.but.clicked.connect(self.plot2)
 
         # Вёрстка
         widget.setLayout(self.grid)
-        self.grid.addWidget(self.but, 0, 1)
-        self.grid.addWidget(self.CameraOutput, 0, 3)
-
+        #self.grid.addWidget(self.but, 0, 1)
+        self.grid.addWidget(self.ModeLabel, 1, 1)
+        self.grid.addWidget(self.CameraOutput, 0, 1)
         self.grid.addWidget(self.canvas, 0, 0, alignment=QtCore.Qt.AlignCenter)
         self.grid.addWidget(self.TranslatorOutput, 0, 0,  alignment=QtCore.Qt.AlignCenter)
         self.setLayout(self.grid)
@@ -74,6 +74,13 @@ class Window(QMainWindow):
     @QtCore.pyqtSlot(QImage)
     def setImage2(self, qImg2):
         self.TranslatorOutput.setPixmap(QPixmap.fromImage(qImg2))
+
+    @QtCore.pyqtSlot(bool)
+    def set_mode(self, value):
+        if value:
+            self.ModeLabel.setText('Режим: Изменение')
+        else:
+            self.ModeLabel.setText('Режим: Построение')
 
     @QtCore.pyqtSlot(str)
     def setGraph(self, value):
@@ -113,12 +120,17 @@ class Window(QMainWindow):
 
     def plot2(self):
         self.figure.clear()
-        data = [np.cos(i) for i in range(-10, 11, 1)]
+        x = np.arange(-10, 11, 1)
+        y = x**2
         # create an axis
         ax = self.figure.add_subplot(111)
         # plot data
-        ax.plot(data, '*-')
+        ax.set_xlabel('X axis')
+        ax.set_ylabel('Y axis')
+        ax.grid()
+        ax.plot(x, x**2, 's-')
         # refresh canvas
+        ax.set_title('test')
         self.canvas.draw()
 
     def clear_canvas(self):

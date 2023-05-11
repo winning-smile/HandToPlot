@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QTime
 from PyQt5.QtGui import QImage, QPixmap
 import PyQt5.QtGui
 import numpy as np
+import time
 import mediapipe as mp
 import cv2
 import math
@@ -10,6 +11,7 @@ class handDetector(QThread):
    changePixmap = pyqtSignal(QImage)
    changePixmap2 = pyqtSignal(QImage)
    graph = pyqtSignal(str)
+   change_mode = pyqtSignal(bool)
 
    def __init__(self, mode=False, maxHands=1, detectionCon=1, trackCon=0.5):
       super().__init__()
@@ -23,6 +25,10 @@ class handDetector(QThread):
       self.mpDraw = mp.solutions.drawing_utils
       self.signal = "clear"
       self.back = cv2.imread('back.png', cv2.IMREAD_UNCHANGED)
+      self.timer = QTimer()
+      self.timer.timeout.connect(self.changeFlag)
+      self.t = []
+      self.flag = False
 
    # Модель находит на каждом кадре скелет руки и возвращает изображение с нарисованным скелетом
    def findHands(self, img, draw=True):
@@ -54,12 +60,18 @@ class handDetector(QThread):
          for i in range(len(lmlist)):
             tmparr.append(lmlist[i][1])
 
-         flag = all(elem > 450 for elem in tmparr)
+         build = all(elem > 450 for elem in tmparr)
+         change = all(elem < 450 for elem in tmparr)
          tmparr = []
 
-         if flag:
+         #if change:
+            #if (math.hypot(lmlist[4][1] - lmlist[8][1], lmlist[4][2] - lmlist[8][2]) < 10) and (lmlist[12][2] < lmlist[4][2]) and (lmlist[12][2] < lmlist[4][2]) and (lmlist[4][2] > lmlist[12][1]) and (lmlist[8][1] > lmlist[12][1]):
+               ##self.graph.emit("cubic")
+               #print("poop")
+
+         if build:
             # парабола done
-            if (math.hypot(lmlist[4][1] - lmlist[14][1], lmlist[4][2] - lmlist[14][2]) < 10) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[12][2] < lmlist[16][2]) and (lmlist[12][2] < lmlist[20][2]):
+            if (math.hypot(lmlist[4][1] - lmlist[14][1], lmlist[4][2] - lmlist[14][2]) < 10) and (lmlist[8][2] > lmlist[16][2]) and (lmlist[8][2] > lmlist[20][2]) and (lmlist[12][2] > lmlist[16][2]) and (lmlist[12][2] > lmlist[20][2]):
                self.graph.emit("cubic")
             # гипербола done
             elif (math.hypot(lmlist[4][1] - lmlist[18][1], lmlist[4][2] - lmlist[18][2]) < 10) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[12][2] < lmlist[20][2]) and (lmlist[16][2] < lmlist[20][2]):
@@ -77,6 +89,31 @@ class handDetector(QThread):
             elif (lmlist[4][2] < lmlist[8][2]) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]):
                self.graph.emit("clear")
 
+   def changeFlag(self):
+      if self.flag:
+         self.flag = False
+         self.change_mode.emit(self.flag)
+      else:
+         self.flag = True
+         self.change_mode.emit(self.flag)
+
+   def on_build_new(self, lmlist):
+      tmparr = []
+      lenarr = []
+      if lmlist:
+         for i in range(len(lmlist)):
+            tmparr.append(lmlist[i][1])
+
+         # Переход в режим изменения
+         if (math.hypot(lmlist[4][1] - lmlist[8][1], lmlist[4][2] - lmlist[8][2]) < 20) and (lmlist[12][2] < lmlist[4][2]) and (lmlist[12][2] < lmlist[8][2]) and (lmlist[4][1] > lmlist[12][1]) and (lmlist[8][1] > lmlist[12][1]):
+            self.t.append(0)
+            if len(self.t) >= 30:
+               self.t.clear()
+               self.changeFlag()
+               time.sleep(3)
+
+
+
    # Транслятор движений руки с канала видеокамеры на верхний слой
    def translator(self, lmlist):
       # Делаем копию оригинального фона
@@ -85,7 +122,7 @@ class handDetector(QThread):
       if lmlist:
          for elem in lmlist:
             # Рисуем круг на каждой опорной точке
-            cv2.circle(self.cache, (elem[1], elem[2]), 10, (50, 0, 255, 255), cv2.FILLED)
+            cv2.circle(self.cache, (elem[1]+280, elem[2]+260), 5, (50, 0, 255, 255), cv2.FILLED)
 
       # Преобразуем массив значений в формат QImage
       self.cache = cv2.cvtColor(self.cache, cv2.COLOR_BGR2RGBA)
@@ -112,8 +149,8 @@ class handDetector(QThread):
          if ret1:
             im1 = cv2.cvtColor(self.findHands(image1), cv2.COLOR_BGR2RGB)
             lmList = self.findPosition(image1)
-            self.on_build(lmList)
             self.translator(lmList)
+            self.on_build_new(lmList)
             height1, width1, channel1 = im1.shape
             step1 = channel1 * width1
             qImg1 = QImage(im1.data, width1, height1, step1, QImage.Format_RGB888)
