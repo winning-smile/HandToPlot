@@ -31,17 +31,17 @@ class Window(QMainWindow):
         self.grid = QGridLayout()
 
         # Слой куда выводить изображение с видеокамеры
-        self.CameraOutput = QLabel()
+        self.camera_out = QLabel()
 
         # Индикатор режима работы
-        self.ModeLabel = QLabel()
-        self.ModeLabel.setText('Режим: Построение')
+        self.mode_label = QLabel()
+        self.mode_label.setText('Режим: Построение')
 
         # Создаём процесс для видеокамеры
         self.Camera = handDetector()
-        self.Camera.changePixmap.connect(self.setImage)
-        self.Camera.graph.connect(self.setGraph)
-        self.Camera.changePixmap2.connect(self.setImage2)
+        self.Camera.change_camera.connect(self.set_camera_image)
+        self.Camera.change_translator.connect(self.set_translator_image)
+        self.Camera.change_graph.connect(self.set_graph_value)
         self.Camera.change_mode.connect(self.set_mode)
         self.Camera.start()
 
@@ -50,9 +50,9 @@ class Window(QMainWindow):
         self.canvas = FigureCanvas(self.figure)
 
         # Слой куда транслировать скелет руки
-        self.TranslatorOutput = QLabel()
-        backgroundImg = QPixmap('back.png')
-        self.TranslatorOutput.setPixmap(backgroundImg)
+        self.translator_out = QLabel()
+        background_img = QPixmap('back.png')
+        self.translator_out.setPixmap(background_img)
 
         self.but = QPushButton()
         self.but.clicked.connect(self.plot2)
@@ -60,34 +60,34 @@ class Window(QMainWindow):
         # Вёрстка
         widget.setLayout(self.grid)
         #self.grid.addWidget(self.but, 0, 1)
-        self.grid.addWidget(self.ModeLabel, 1, 1)
-        self.grid.addWidget(self.CameraOutput, 0, 1)
+        self.grid.addWidget(self.mode_label, 1, 1)
+        self.grid.addWidget(self.camera_out, 0, 1)
         self.grid.addWidget(self.canvas, 0, 0, alignment=QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.TranslatorOutput, 0, 0,  alignment=QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.translator_out, 0, 0,  alignment=QtCore.Qt.AlignCenter)
         self.setLayout(self.grid)
 
 
     @QtCore.pyqtSlot(QImage)
-    def setImage(self, qImg1):
-        self.CameraOutput.setPixmap(QPixmap.fromImage(qImg1))
+    def set_camera_image(self, camera_image):
+        self.camera_out.setPixmap(QPixmap.fromImage(camera_image))
 
     @QtCore.pyqtSlot(QImage)
-    def setImage2(self, qImg2):
-        self.TranslatorOutput.setPixmap(QPixmap.fromImage(qImg2))
+    def set_translator_image(self, translator_image):
+        self.translator_out.setPixmap(QPixmap.fromImage(translator_image))
 
     @QtCore.pyqtSlot(bool)
-    def set_mode(self, value):
-        if value:
-            self.ModeLabel.setText('Режим: Изменение')
+    def set_mode(self, bool_value):
+        if bool_value:
+            self.mode_label.setText('Режим: Изменение')
         else:
-            self.ModeLabel.setText('Режим: Построение')
+            self.mode_label.setText('Режим: Построение')
 
     @QtCore.pyqtSlot(str)
-    def setGraph(self, value):
-        if value == "clear":
+    def set_graph_value(self, graph_value):
+        if graph_value == "clear":
             self.clear_canvas()
         else:
-            self.plot(value)
+            self.plot(graph_value)
 
     def closeEvent(self, event):
         reply = QMessageBox.question(QMessageBox, 'Выход',
@@ -101,37 +101,59 @@ class Window(QMainWindow):
     def plot(self, signal):
         if signal == "cubic":
             self.figure.clear()
-            data = [i**2 for i in range(-10, 11, 1)]
+            x = np.arange(-10, 11, 1)
+            # create an axis
+            ax = self.figure.add_subplot(111)
+            ax.set_xlabel('X axis')
+            ax.set_ylabel('Y axis')
+            ax.set_title('y = x*x')
+            ax.grid()
+            # plot data
+            ax.plot(x, x ** 2, 's-')
+            # refresh canvas
+            self.canvas.draw()
+
         if signal == "quadro":
             self.figure.clear()
-            data = [i**3 for i in range(-10, 11, 1)]
+            x = np.arange(-10, 11, 1)
+            # create an axis
+            ax = self.figure.add_subplot(111)
+            ax.set_xlabel('X axis')
+            ax.set_ylabel('Y axis')
+            ax.set_title('y = x*x*x')
+            ax.grid()
+            # plot data
+            ax.plot(x, x ** 3, 's-')
+            # refresh canvas
+            self.canvas.draw()
+
         if signal == "sin":
             self.figure.clear()
-            data = [np.sin(i) for i in range(-10, 11, 1)]
+            x = np.arange(-10, 11, 1)
+            # create an axis
+            ax = self.figure.add_subplot(111)
+            ax.set_xlabel('X axis')
+            ax.set_ylabel('Y axis')
+            ax.set_title('y = sin(x)')
+            ax.grid()
+            # plot data
+            ax.plot(x, np.sin(x), 's-')
+            # refresh canvas
+            self.canvas.draw()
+
         if signal == "cos":
             self.figure.clear()
-            data = [np.cos(i) for i in range(-10, 11, 1)]
-        # create an axis
-        ax = self.figure.add_subplot(111)
-        # plot data
-        ax.plot(data, '*-')
-        # refresh canvas
-        self.canvas.draw()
-
-    def plot2(self):
-        self.figure.clear()
-        x = np.arange(-10, 11, 1)
-        y = x**2
-        # create an axis
-        ax = self.figure.add_subplot(111)
-        # plot data
-        ax.set_xlabel('X axis')
-        ax.set_ylabel('Y axis')
-        ax.grid()
-        ax.plot(x, x**2, 's-')
-        # refresh canvas
-        ax.set_title('test')
-        self.canvas.draw()
+            x = np.arange(-10, 11, 1)
+            # create an axis
+            ax = self.figure.add_subplot(111)
+            ax.set_xlabel('X axis')
+            ax.set_ylabel('Y axis')
+            ax.set_title('y = cos(x)')
+            ax.grid()
+            # plot data
+            ax.plot(x, np.cos(x), 's-')
+            # refresh canvas
+            self.canvas.draw()
 
     def clear_canvas(self):
         self.figure.clear()

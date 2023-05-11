@@ -8,26 +8,32 @@ import cv2
 import math
 
 class handDetector(QThread):
-   changePixmap = pyqtSignal(QImage)
-   changePixmap2 = pyqtSignal(QImage)
-   graph = pyqtSignal(str)
+   change_camera = pyqtSignal(QImage)
+   change_translator = pyqtSignal(QImage)
+   change_graph = pyqtSignal(str)
    change_mode = pyqtSignal(bool)
 
    def __init__(self, mode=False, maxHands=1, detectionCon=1, trackCon=0.5):
       super().__init__()
+      # Камера
       self.cap1 = None
       self.mode = mode
+      # Количество рук, которые можно одновременно отслеживать
       self.maxHands = maxHands
+      # Нижний порог подтверждения руки
       self.detectionCon = detectionCon
       self.trackCon = trackCon
+      # Модель для поиска руки
       self.mpHands = mp.solutions.hands
       self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.detectionCon, self.trackCon)
       self.mpDraw = mp.solutions.drawing_utils
+      # Сигнал для передачи данных, о том какой график строить
       self.signal = "clear"
+      # Картинка, на которую транслируется движения скелета руки
       self.back = cv2.imread('back.png', cv2.IMREAD_UNCHANGED)
-      self.timer = QTimer()
-      self.timer.timeout.connect(self.changeFlag)
+      # Буффер для смены режима
       self.t = []
+      # Флаг для смены режима
       self.flag = False
 
    # Модель находит на каждом кадре скелет руки и возвращает изображение с нарисованным скелетом
@@ -89,6 +95,7 @@ class handDetector(QThread):
             elif (lmlist[4][2] < lmlist[8][2]) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]):
                self.graph.emit("clear")
 
+   # Смена флага изменения/построения
    def changeFlag(self):
       if self.flag:
          self.flag = False
@@ -97,22 +104,21 @@ class handDetector(QThread):
          self.flag = True
          self.change_mode.emit(self.flag)
 
+   # Функция детекции жестов для построения графиков
    def on_build_new(self, lmlist):
       tmparr = []
-      lenarr = []
+
       if lmlist:
          for i in range(len(lmlist)):
             tmparr.append(lmlist[i][1])
 
-         # Переход в режим изменения
+         # Переход в режим изменения/построения
          if (math.hypot(lmlist[4][1] - lmlist[8][1], lmlist[4][2] - lmlist[8][2]) < 20) and (lmlist[12][2] < lmlist[4][2]) and (lmlist[12][2] < lmlist[8][2]) and (lmlist[4][1] > lmlist[12][1]) and (lmlist[8][1] > lmlist[12][1]):
             self.t.append(0)
             if len(self.t) >= 30:
                self.t.clear()
                self.changeFlag()
-               time.sleep(3)
-
-
+               time.sleep(1)
 
    # Транслятор движений руки с канала видеокамеры на верхний слой
    def translator(self, lmlist):
