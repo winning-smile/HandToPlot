@@ -13,6 +13,8 @@ class handDetector(QThread):
    change_translator = pyqtSignal(QImage)
    change_graph = pyqtSignal(str)
    change_mode = pyqtSignal(bool)
+   change_x = pyqtSignal(int)
+   change_y = pyqtSignal(int)
 
    def __init__(self, mode=False, maxHands=1, detectionCon=1, trackCon=0.5):
       super().__init__()
@@ -38,6 +40,7 @@ class handDetector(QThread):
       self.cubic = []
       self.quadro = []
       self.clear_flag = []
+      self.xy_flag = []
       # Флаг для смены режима - по умолчанию построение
       self.flag = True
 
@@ -79,6 +82,7 @@ class handDetector(QThread):
       self.quadro.clear()
       self.t.clear()
       self.clear_flag.clear()
+      self.xy_flag.clear()
 
    # Функция детекции жестов для построения графиков
    def on_build(self, lmlist):
@@ -121,6 +125,14 @@ class handDetector(QThread):
                   self.change_graph.emit("quadro")
                   time.sleep(1)
 
+         else:
+            if (math.hypot(lmlist[4][1] - lmlist[8][1], lmlist[4][2] - lmlist[8][2]) < 15) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]) and(lmlist[8][2] < lmlist[12][2]) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]):
+               distance_x = math.ceil(math.ceil(lmlist[4][1] - 320) / 10)
+               self.change_x.emit(distance_x)
+               #print(distance_x)
+               #print(math.hypot(lmlist[4][1] - 320, lmlist[4][2] - 240))
+
+
    # Транслятор движений руки с канала видеокамеры на верхний слой
    def translator(self, lmlist):
       # Делаем копию оригинального фона
@@ -130,6 +142,9 @@ class handDetector(QThread):
          for elem in lmlist:
             # Рисуем круг на каждой опорной точке
             cv2.circle(self.cache, (elem[1]+280, elem[2]+260), 5, (50, 0, 255, 255), cv2.FILLED)
+            if not self.flag:
+               # Опорная точка
+               cv2.circle(self.cache, (600, 500), 5, (255, 255, 0, 255), cv2.FILLED)
 
       # Преобразуем массив значений в формат QImage
       self.cache = cv2.cvtColor(self.cache, cv2.COLOR_BGR2RGBA)

@@ -14,6 +14,7 @@ from matplotlib import rc
 import random
 
 matplotlib.use('Qt5Agg')
+plt.style.use("Solarize_Light2")
 
 
 class Window(QMainWindow):
@@ -23,6 +24,7 @@ class Window(QMainWindow):
         self.setWindowTitle("UI_Plot")
         self.setGeometry(100, 100, 600, 400)
         self.showMaximized()
+        self.graph_signal = None
 
         widget = QWidget()
         self.setCentralWidget(widget)
@@ -43,6 +45,7 @@ class Window(QMainWindow):
         self.Camera.change_translator.connect(self.set_translator_image)
         self.Camera.change_graph.connect(self.set_graph_value)
         self.Camera.change_mode.connect(self.set_mode)
+        self.Camera.change_x.connect(self.set_x)
         self.Camera.start()
 
         # Слой для отображения графиков
@@ -81,9 +84,15 @@ class Window(QMainWindow):
     @QtCore.pyqtSlot(str)
     def set_graph_value(self, graph_value):
         if graph_value == "clear":
+            self.graph_signal = graph_value
             self.clear_canvas()
         else:
+            self.graph_signal = graph_value
             self.plot(graph_value)
+
+    @QtCore.pyqtSlot(int)
+    def set_x(self, x_value):
+        self.plot_update(x_value)
 
     def closeEvent(self, event):
         reply = QMessageBox.question(QMessageBox, 'Выход',
@@ -97,15 +106,15 @@ class Window(QMainWindow):
     def plot(self, signal):
         if signal == "cubic":
             self.figure.clear()
-            x = np.arange(-10, 11, 1)
+            x = np.arange(-10, 10.1, 0.1)
             # create an axis
             ax = self.figure.add_subplot(111)
-            ax.set_xlabel('X axis')
-            ax.set_ylabel('Y axis')
+            ax.set_xlabel('Ось абсцисс')
+            ax.set_ylabel('Ось ординат')
             ax.set_title('y = x*x')
             ax.grid()
             # plot data
-            ax.plot(x, x ** 2, 's-')
+            ax.plot(x, x ** 2)
             # refresh canvas
             self.canvas.draw()
 
@@ -114,8 +123,8 @@ class Window(QMainWindow):
             x = np.arange(-10, 11, 1)
             # create an axis
             ax = self.figure.add_subplot(111)
-            ax.set_xlabel('X axis')
-            ax.set_ylabel('Y axis')
+            ax.set_xlabel('Ось абсцисс')
+            ax.set_ylabel('Ось ординат')
             ax.set_title('y = x*x*x')
             ax.grid()
             # plot data
@@ -128,8 +137,8 @@ class Window(QMainWindow):
             x = np.arange(-10, 11, 1)
             # create an axis
             ax = self.figure.add_subplot(111)
-            ax.set_xlabel('X axis')
-            ax.set_ylabel('Y axis')
+            ax.set_xlabel('Ось абсцисс')
+            ax.set_ylabel('Ось ординат')
             ax.set_title('y = sin(x)')
             ax.grid()
             # plot data
@@ -142,12 +151,28 @@ class Window(QMainWindow):
             x = np.arange(-10, 11, 1)
             # create an axis
             ax = self.figure.add_subplot(111)
-            ax.set_xlabel('X axis')
-            ax.set_ylabel('Y axis')
+            ax.set_xlabel('Ось абсцисс')
+            ax.set_ylabel('Ось ординат')
             ax.set_title('y = cos(x)')
             ax.grid()
             # plot data
             ax.plot(x, np.cos(x), 's-')
+            # refresh canvas
+            self.canvas.draw()
+
+    def plot_update(self, dist_x):
+        if self.graph_signal == "cubic":
+            self.figure.clear()
+            x = np.arange(-10-dist_x, 11+dist_x, 1)
+            # create an axis
+            ax = self.figure.add_subplot(111)
+            ax.set_xlabel('Ось абсцисс')
+            ax.set_ylabel('Ось ординат')
+            ax.set_title('y = x*x')
+            ax.grid()
+            # plot data
+            ax.plot(x, x ** 2)
+            ax.plot(x, (x-dist_x)**2)
             # refresh canvas
             self.canvas.draw()
 
