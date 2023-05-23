@@ -13,8 +13,7 @@ class handDetector(QThread):
    change_translator = pyqtSignal(QImage)
    change_graph = pyqtSignal(str)
    change_mode = pyqtSignal(bool)
-   change_x = pyqtSignal(int)
-   change_y = pyqtSignal(int)
+   change_xy = pyqtSignal(int, int)
 
    def __init__(self, mode=False, maxHands=1, detectionCon=1, trackCon=0.5):
       super().__init__()
@@ -98,7 +97,7 @@ class handDetector(QThread):
             if len(self.t) >= 30:
                self.refresh_flags()
                self.change_flag()
-               time.sleep(1)
+               #time.sleep(1)
 
          if self.flag:
             # Очистка холста
@@ -107,7 +106,7 @@ class handDetector(QThread):
                if len(self.clear_flag) >= 30:
                   self.refresh_flags()
                   self.change_graph.emit("clear")
-                  time.sleep(1)
+                  #time.sleep(1)
 
             # парабола done
             elif (math.hypot(lmlist[4][1] - lmlist[14][1], lmlist[4][2] - lmlist[14][2]) < 10) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[12][2] < lmlist[16][2]) and (lmlist[12][2] < lmlist[20][2]):
@@ -115,7 +114,7 @@ class handDetector(QThread):
                if len(self.cubic) >= 30:
                   self.refresh_flags()
                   self.change_graph.emit("cubic")
-                  time.sleep(1)
+                  #time.sleep(1)
 
             # гипербола done
             elif (math.hypot(lmlist[4][1] - lmlist[18][1], lmlist[4][2] - lmlist[18][2]) < 10) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[12][2] < lmlist[20][2]) and (lmlist[16][2] < lmlist[20][2]):
@@ -123,15 +122,22 @@ class handDetector(QThread):
                if len(self.quadro) >= 30:
                   self.refresh_flags()
                   self.change_graph.emit("quadro")
-                  time.sleep(1)
+                  #time.sleep(1)
 
+         # TODO: increase/decrease graph
          else:
             if (math.hypot(lmlist[4][1] - lmlist[8][1], lmlist[4][2] - lmlist[8][2]) < 15) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]) and(lmlist[8][2] < lmlist[12][2]) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]):
-               distance_x = math.ceil(math.ceil(lmlist[4][1] - 320) / 10)
-               self.change_x.emit(distance_x)
+               self.xy_flag.append(0)
+               if len(self.xy_flag) >= 10:
+                  self.refresh_flags()
+                  distance_x = math.ceil(math.ceil(lmlist[4][1] - 320) / 10)
+                  distance_y = math.ceil(math.ceil(lmlist[4][2] - 320) / 10)
+                  self.change_xy.emit(distance_x, -distance_y)
+
+                   # TODO: more flex to change coordinates
+
                #print(distance_x)
                #print(math.hypot(lmlist[4][1] - 320, lmlist[4][2] - 240))
-
 
    # Транслятор движений руки с канала видеокамеры на верхний слой
    def translator(self, lmlist):
