@@ -1,10 +1,12 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import QtWebEngineWidgets
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPalette, QColor, QImage, QPixmap
 from CamThread import *
+from labeler import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
@@ -25,6 +27,7 @@ class Window(QMainWindow):
         palette_green = QPalette()
         palette_red.setColor(QPalette.Window, (QColor(255, 0, 0, 127)))
         palette_green.setColor(QPalette.Window, (QColor(0, 255, 0, 127)))
+        self.text = ""
 
     def setupUi(self, MainWindow):
         # Настройки главного окна
@@ -43,7 +46,6 @@ class Window(QMainWindow):
 
         # Виджет всего окна
         self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
 
         # Виджет левого меню
         self.widget1 = QtWidgets.QWidget(self.centralwidget)
@@ -62,10 +64,18 @@ class Window(QMainWindow):
         self.grid.addWidget(self.translator, 0, 0)
 
         # Вывод уравнения графика
-        self.webEngineView = QtWebEngineWidgets.QWebEngineView(self.centralwidget)
-        #self.webEngineView.setGeometry(QtCore.QRect(270, 50, 811, 41))
-        self.webEngineView.setUrl(QtCore.QUrl("about:blank"))
-        self.grid.addWidget(self.webEngineView, 0, 0)
+        self.mathtext = QWebEngineView(self.centralwidget)
+        pageSource = """
+                     <html><head>
+                     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                     </script></head>
+                     <body>
+                     <p><mathjax style="font-size:2em">Ожидание ввода</mathjax></p>
+                     </body></html>
+                     """
+        self.mathtext.setHtml(pageSource)
+        self.mathtext.page().settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.ShowScrollBars, False)
+        self.mathtext.setGeometry(QtCore.QRect(270, 50, 811, 80))
 
         # Виджет правого меню
         self.layoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -103,7 +113,6 @@ class Window(QMainWindow):
 
         # Кнопка справки
         self.pushButton = QtWidgets.QPushButton(self.layoutWidget)
-        self.pushButton.setObjectName("pushButton")
         self.verticalLayout.addWidget(self.pushButton)
 
         # Вывыод изображения видеокамеры
@@ -114,14 +123,13 @@ class Window(QMainWindow):
         sizePolicy.setHeightForWidth(self.camera_out.sizePolicy().hasHeightForWidth())
         self.camera_out.setSizePolicy(sizePolicy)
         self.camera_out.setMinimumSize(QtCore.QSize(640, 480))
-        self.camera_out.setObjectName("camera_out")
         self.verticalLayout.addWidget(self.camera_out)
 
         # Процесс модуля CamThread.py
         self.Camera = handDetector()
         self.Camera.change_camera.connect(self.set_camera_image)
         self.Camera.change_translator.connect(self.set_translator_image)
-        #self.Camera.change_graph.connect(self.set_graph_value)
+        self.Camera.change_graph.connect(self.set_graph_value)
         self.Camera.change_mode.connect(self.set_mode)
         #self.Camera.change_xy.connect(self.set_xy)
         self.Camera.start()
@@ -130,6 +138,7 @@ class Window(QMainWindow):
         spacerItem = QtWidgets.QSpacerItem(20, 250, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.verticalLayout.addItem(spacerItem)
 
+        # Инициализация интерфейса
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -171,8 +180,27 @@ class Window(QMainWindow):
     def set_xy(self, x_value, y_value):
         self.plot_update(x_value, y_value)
 
-    # TODO: mathtext
+    def retranslate_mathtext(self, signal, x, y, z):
+        self.text = mathtext_update(signal, x, y, z)
+        self.mathtext.setHtml(self.text)
+        self.mathtext.page().settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.ShowScrollBars, False)
+
+    # TODO: mathtext to plot_update
     def plot(self, signal):
+        if signal == "line":
+            self.canvas.figure.clear()
+            x = np.arange(-10, 10.1, 0.1)
+            # create an axis
+            ax = self.canvas.figure.add_subplot(111)
+            ax.set_xlabel('Ось абсцисс')
+            ax.set_ylabel('Ось ординат')
+            ax.grid()
+            ax.plot(x, x, label='y=x')
+            ax.legend()
+            # refresh canvas
+            self.retranslate_mathtext(signal, 0, 0, 1)
+            self.canvas.draw()
+
         if signal == "cubic":
             self.canvas.figure.clear()
             x = np.arange(-10, 10.1, 0.1)
@@ -180,12 +208,11 @@ class Window(QMainWindow):
             ax = self.canvas.figure.add_subplot(111)
             ax.set_xlabel('Ось абсцисс')
             ax.set_ylabel('Ось ординат')
-            ax.set_title('y = x*x')
             ax.grid()
             ax.plot(x, x ** 2, label='y=x*x')
-            ax.scatter(0,0)
             ax.legend()
             # refresh canvas
+            self.retranslate_mathtext(signal, 0, 0, 1)
             self.canvas.draw()
 
         if signal == "quadro":
@@ -195,39 +222,10 @@ class Window(QMainWindow):
             ax = self.figure.add_subplot(111)
             ax.set_xlabel('Ось абсцисс')
             ax.set_ylabel('Ось ординат')
-            ax.set_title('y = x*x*x')
             ax.grid()
-            # plot data
             ax.plot(x, x ** 3, 's-')
-            # refresh canvas
-            self.canvas.draw()
-
-        if signal == "sin":
-            self.figure.clear()
-            x = np.arange(-10, 11, 1)
-            # create an axis
-            ax = self.figure.add_subplot(111)
-            ax.set_xlabel('Ось абсцисс')
-            ax.set_ylabel('Ось ординат')
-            ax.set_title('y = sin(x)')
-            ax.grid()
-            # plot data
-            ax.plot(x, np.sin(x), 's-')
-            # refresh canvas
-            self.canvas.draw()
-
-        if signal == "cos":
-            self.figure.clear()
-            x = np.arange(-10, 11, 1)
-            # create an axis
-            ax = self.figure.add_subplot(111)
-            ax.set_xlabel('Ось абсцисс')
-            ax.set_ylabel('Ось ординат')
-            ax.set_title('y = cos(x)')
-            ax.grid()
-            # plot data
-            ax.plot(x, np.cos(x), 's-')
-            # refresh canvas
+            ax.legend()
+            self.retranslate_mathtext(signal, 0, 0, 1)
             self.canvas.draw()
 
     def plot_update(self, dist_x, dist_y):
@@ -258,7 +256,7 @@ class Window(QMainWindow):
             self.canvas.draw()
 
     def clear_canvas(self):
-        self.figure.clear()
+        self.canvas.figure.clear()
         self.canvas.draw()
 
     def closeEvent(self, event):
