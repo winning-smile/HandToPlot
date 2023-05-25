@@ -20,6 +20,9 @@ class MplCanvas(FigureCanvas):
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.working_ports = []
+        self.list_ports()
+        self.text = ""
         self.setupUi(self)
         self.showMaximized()
         # Цвета для кнопок
@@ -28,7 +31,7 @@ class Window(QMainWindow):
         palette_green = QPalette()
         palette_red.setColor(QPalette.Window, (QColor(255, 0, 0, 127)))
         palette_green.setColor(QPalette.Window, (QColor(0, 255, 0, 127)))
-        self.text = ""
+
 
     def setupUi(self, MainWindow):
         # Настройки главного окна
@@ -82,9 +85,16 @@ class Window(QMainWindow):
         self.layoutWidget = QtWidgets.QWidget(self.centralwidget)
         self.layoutWidget.setGeometry(QtCore.QRect(1270, 260, 640, 859))
 
-        # Сетка левого меню
+        # Сетка правого меню
         self.verticalLayout = QtWidgets.QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+
+        # Выбор видеокамеры
+        self.camera_list = QtWidgets.QComboBox(self.layoutWidget)
+        self.camera_list.setMinimumSize(QtCore.QSize(640, 20))
+        self.camera_list.addItems(self.working_ports)
+        self.verticalLayout.addWidget(self.camera_list)
+
 
         # Индикатор режима построения
         self.build_mode = QtWidgets.QLabel(self.layoutWidget)
@@ -145,6 +155,18 @@ class Window(QMainWindow):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+    def list_ports(self):
+        dev_port = 1
+        while dev_port != 5:
+            camera = cv2.VideoCapture(dev_port)
+            if not camera.isOpened():
+                pass
+            else:
+                is_reading, img = camera.read()
+                if is_reading:
+                    self.working_ports.append("Видеокамера " + str(dev_port))
+            dev_port += 1
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "HandPlot"))
@@ -191,26 +213,22 @@ class Window(QMainWindow):
         self.mathtext.setHtml(self.text)
         self.mathtext.page().settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.ShowScrollBars, False)
 
-    # TODO: mathtext to plot_update
     def plot(self, signal):
         if signal == "line":
             self.canvas.figure.clear()
             x = np.arange(-10, 10.1, 0.1)
-            # create an axis
             ax = self.canvas.figure.add_subplot(111)
             ax.set_xlabel('Ось абсцисс')
             ax.set_ylabel('Ось ординат')
             ax.grid()
             ax.plot(x, x, label='y=x')
             ax.legend()
-            # refresh canvas
             self.retranslate_mathtext(signal, 0, 0, 1)
             self.canvas.draw()
 
         if signal == "cubic":
             self.canvas.figure.clear()
             x = np.arange(-10, 10.1, 0.1)
-            # create an axis
             ax = self.canvas.figure.add_subplot(111)
             ax.set_xlabel('Ось абсцисс')
             ax.set_ylabel('Ось ординат')
@@ -224,7 +242,6 @@ class Window(QMainWindow):
         if signal == "quadro":
             self.figure.clear()
             x = np.arange(-10, 11, 1)
-            # create an axis
             ax = self.figure.add_subplot(111)
             ax.set_xlabel('Ось абсцисс')
             ax.set_ylabel('Ось ординат')
@@ -238,13 +255,11 @@ class Window(QMainWindow):
         if self.graph_signal == "cubic":
             self.canvas.figure.clear()
             x = np.arange(-10-dist_x, 11+dist_x, 1)
-            # create an axis
             ax = self.canvas.figure.add_subplot(111)
             ax.set_xlabel('Ось абсцисс')
             ax.set_ylabel('Ось ординат')
             ax.set_title('y = x*x')
             ax.grid()
-            # plot data
             ax.plot(x, x ** 2, label='y=x*x')
 
             if dist_x > 0:
@@ -262,8 +277,18 @@ class Window(QMainWindow):
             self.canvas.draw()
 
     def clear_canvas(self):
+
         self.canvas.figure.clear()
         self.canvas.draw()
+        pageSource = """
+                     <html><head>
+                     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                     </script></head>
+                     <body>
+                     <p><mathjax style="font-size:2em">Ожидание ввода</mathjax></p>
+                     </body></html>
+                     """
+        self.mathtext.setHtml(pageSource)
 
     def closeEvent(self, event):
         reply = QMessageBox.question(QMessageBox, 'Выход',
