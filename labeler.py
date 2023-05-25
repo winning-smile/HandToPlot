@@ -4,6 +4,8 @@ def mathtext_update(graph, x, y, z):
     xt = str(np.abs(x))
     yt = str(np.abs(y))
     zt = str(np.abs(z))
+    xtyt = str(x+y)
+
     if graph == "line":
         if x == 0 and y == 0 and z == 1:
             pagesource = """
@@ -11,16 +13,43 @@ def mathtext_update(graph, x, y, z):
                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
                         </script></head>
                         <body>
-                        <p><mathjax style="font-size:2em">$$ y = x $$</mathjax></p>
+                        <p><mathjax style="font-size:2em">$$y = x$$</mathjax></p>
                         </body></html>
                         """
-        if x > 0 and y == 0 and z == 1:
-            pagesource = """
+        if x == 0 and y > 0 and z == 1:
+            pagesource = f"""
                          <html><head>
                          <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
                          </script></head>
                          <body>
-                         <p><mathjax style="font-size:2em">$$ y = x + {x} $$</mathjax></p>
+                         <p><mathjax style="font-size:2em">$$ y = x + {yt} $$</mathjax></p>
+                         </body></html>
+                         """
+        if x == 0 and y < 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = x - {yt} $$</mathjax></p>
+                         </body></html>
+                         """
+        if x > 0 and y == 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = x + {xt} $$</mathjax></p>
+                         </body></html>
+                         """
+        if x < 0 and y == 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = x - {xt} $$</mathjax></p>
                          </body></html>
                          """
     elif graph == "cubic":
@@ -33,6 +62,24 @@ def mathtext_update(graph, x, y, z):
                         <p><mathjax style="font-size:2em">$$y = x^2$$</mathjax></p>
                         </body></html>
                         """
+        if x == 0 and y > 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = x^2 + {yt} $$</mathjax></p>
+                         </body></html>
+                         """
+        if x == 0 and y < 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = x^2 - {yt} $$</mathjax></p>
+                         </body></html>
+                         """
         if x > 0 and y == 0 and z == 1:
             pagesource = f"""
                          <html><head>
@@ -42,13 +89,13 @@ def mathtext_update(graph, x, y, z):
                          <p><mathjax style="font-size:2em">$$ y = (x-{xt})^2 $$</mathjax></p>
                          </body></html>
                          """
-        if x == 0 and y > 0 and z == 1:
+        if x < 0 and y == 0 and z == 1:
             pagesource = f"""
                          <html><head>
                          <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
                          </script></head>
                          <body>
-                         <p><mathjax style="font-size:2em">$$ y = x^2 + {yt} $$</mathjax></p>
+                         <p><mathjax style="font-size:2em">$$ y = (x + {xt})^2 $$</mathjax></p>
                          </body></html>
                          """
         if x > 0 and y > 0 and z == 1:
@@ -60,7 +107,7 @@ def mathtext_update(graph, x, y, z):
                          <p><mathjax style="font-size:2em">$$ y = (x-{xt})^2 + {yt} $$</mathjax></p>
                          </body></html>
                          """
-        if x > 0 and y < 0 and z == 1:
+        if x > 0 > y and z == 1:
             pagesource = f"""
                          <html><head>
                          <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
@@ -69,7 +116,7 @@ def mathtext_update(graph, x, y, z):
                          <p><mathjax style="font-size:2em">$$ y = (x-{xt})^2 - {yt} $$</mathjax></p>
                          </body></html>
                          """
-        if x < 0 and y > 0 and z == 1:
+        if x < 0 < y and z == 1:
             pagesource = f"""
                          <html><head>
                          <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
@@ -87,7 +134,6 @@ def mathtext_update(graph, x, y, z):
                          <p><mathjax style="font-size:2em">$$ y = (x + {xt})^2 - {yt} $$</mathjax></p>
                          </body></html>
                          """
-
     elif graph == "quadro":
         if x == 0 and y == 0 and z == 1:
             pagesource = """
@@ -95,7 +141,79 @@ def mathtext_update(graph, x, y, z):
                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
                         </script></head>
                         <body>
-                        <p><mathjax style="font-size:2em">$$ y = x^3 $$</mathjax></p>
+                        <p><mathjax style="font-size:2em">$$y = x^3$$</mathjax></p>
                         </body></html>
                         """
+        if x == 0 and y > 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = x^3 + {yt} $$</mathjax></p>
+                         </body></html>
+                         """
+        if x == 0 and y < 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = x^3 - {yt} $$</mathjax></p>
+                         </body></html>
+                         """
+        if x > 0 and y == 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = (x-{xt})^3 $$</mathjax></p>
+                         </body></html>
+                         """
+        if x < 0 and y == 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = (x + {xt})^3 $$</mathjax></p>
+                         </body></html>
+                         """
+        if x > 0 and y > 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = (x-{xt})^3 + {yt} $$</mathjax></p>
+                         </body></html>
+                         """
+        if x > 0 > y and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = (x-{xt})^3 - {yt} $$</mathjax></p>
+                         </body></html>
+                         """
+        if x < 0 < y and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = (x + {xt})^3 + {yt} $$</mathjax></p>
+                         </body></html>
+                         """
+        if x < 0 and y < 0 and z == 1:
+            pagesource = f"""
+                         <html><head>
+                         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">                     
+                         </script></head>
+                         <body>
+                         <p><mathjax style="font-size:2em">$$ y = (x + {xt})^3 - {yt} $$</mathjax></p>
+                         </body></html>
+                         """
     return pagesource

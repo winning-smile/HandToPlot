@@ -36,6 +36,7 @@ class handDetector(QThread):
       # Буффер для смены режима
       self.t = []
       # Буфферы для смены графиков
+      self.line = []
       self.cubic = []
       self.quadro = []
       self.clear_flag = []
@@ -77,6 +78,7 @@ class handDetector(QThread):
 
    # Обнуление счётчиков для жестов построения графиков
    def refresh_flags(self):
+      self.line.clear()
       self.cubic.clear()
       self.quadro.clear()
       self.t.clear()
@@ -97,7 +99,6 @@ class handDetector(QThread):
             if len(self.t) >= 30:
                self.refresh_flags()
                self.change_flag()
-               #time.sleep(1)
 
          if self.flag:
             # Очистка холста
@@ -106,23 +107,27 @@ class handDetector(QThread):
                if len(self.clear_flag) >= 30:
                   self.refresh_flags()
                   self.change_graph.emit("clear")
-                  #time.sleep(1)
+
+            # линия done
+            elif (math.hypot(lmlist[4][1] - lmlist[10][1], lmlist[4][2] - lmlist[10][2]) < 15) and (lmlist[8][2] < lmlist[12][2]) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[8][2] < lmlist[4][2]):
+               self.line.append(0)
+               if len(self.line) >= 30:
+                  self.refresh_flags()
+                  self.change_graph.emit("line")
 
             # парабола done
-            elif (math.hypot(lmlist[4][1] - lmlist[14][1], lmlist[4][2] - lmlist[14][2]) < 10) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[12][2] < lmlist[16][2]) and (lmlist[12][2] < lmlist[20][2]):
+            elif (math.hypot(lmlist[4][1] - lmlist[14][1], lmlist[4][2] - lmlist[14][2]) < 15) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[12][2] < lmlist[16][2]) and (lmlist[12][2] < lmlist[20][2]):
                self.cubic.append(0)
                if len(self.cubic) >= 30:
                   self.refresh_flags()
                   self.change_graph.emit("cubic")
-                  #time.sleep(1)
 
             # гипербола done
-            elif (math.hypot(lmlist[4][1] - lmlist[18][1], lmlist[4][2] - lmlist[18][2]) < 10) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[12][2] < lmlist[20][2]) and (lmlist[16][2] < lmlist[20][2]):
+            elif (math.hypot(lmlist[4][1] - lmlist[18][1], lmlist[4][2] - lmlist[18][2]) < 15) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[12][2] < lmlist[20][2]) and (lmlist[16][2] < lmlist[20][2]):
                self.quadro.append(0)
                if len(self.quadro) >= 30:
                   self.refresh_flags()
                   self.change_graph.emit("quadro")
-                  #time.sleep(1)
 
          # TODO: increase/decrease graph
          else:
@@ -135,9 +140,6 @@ class handDetector(QThread):
                   self.change_xy.emit(distance_x, -distance_y)
 
                    # TODO: more flex to change coordinates
-
-               #print(distance_x)
-               #print(math.hypot(lmlist[4][1] - 320, lmlist[4][2] - 240))
 
    # Транслятор движений руки с канала видеокамеры на верхний слой
    def translator(self, lmlist):
