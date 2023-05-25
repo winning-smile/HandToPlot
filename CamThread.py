@@ -135,11 +135,30 @@ class handDetector(QThread):
                self.xy_flag.append(0)
                if len(self.xy_flag) >= 10:
                   self.refresh_flags()
-                  distance_x = math.ceil(math.ceil(lmlist[4][1] - 320) / 10)
-                  distance_y = math.ceil(math.ceil(lmlist[4][2] - 320) / 10)
-                  self.change_xy.emit(distance_x, -distance_y)
+                  distance_x = lmlist[4][1] - 360
+                  distance_y = lmlist[4][2] - 250
+                  tdistance_x, tdistance_y = 0, 0
 
-                   # TODO: more flex to change coordinates
+                  if -220 > distance_x >= -330:
+                     tdistance_x = -10
+                  elif -110 > distance_x >= -220:
+                     tdistance_x = -5
+                  elif 220 >= distance_x > 110:
+                     tdistance_x = 5
+                  elif 330 >= distance_x > 220:
+                     tdistance_x = 10
+
+                  if -150 > distance_y >= -220:
+                     tdistance_y = 10
+                  elif -70 > distance_y >= -150:
+                     tdistance_y = 5
+                  elif 150 >= distance_y > 70:
+                     tdistance_y = -5
+                  elif 220 >= distance_y > 150:
+                     tdistance_y = -10
+
+                  self.change_xy.emit(tdistance_x, tdistance_y)
+
 
    # Транслятор движений руки с канала видеокамеры на верхний слой
    def translator(self, lmlist):
@@ -152,7 +171,7 @@ class handDetector(QThread):
             cv2.circle(self.cache, (elem[1]+280, elem[2]+260), 5, (50, 0, 255, 255), cv2.FILLED)
             if not self.flag:
                # Опорная точка
-               cv2.circle(self.cache, (600, 500), 5, (255, 255, 0, 255), cv2.FILLED)
+               cv2.circle(self.cache, (641, 508), 5, (255, 255, 0, 255), cv2.FILLED) # ЦЕНТР
 
       # Преобразуем массив значений в формат QImage
       self.cache = cv2.cvtColor(self.cache, cv2.COLOR_BGR2RGBA)
