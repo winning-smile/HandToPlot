@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPalette, QColor, QImage, QPixmap
 from CamThread import *
 from labeler import *
+from HelpWindow import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
@@ -112,8 +113,9 @@ class Window(QMainWindow):
         self.verticalLayout.addWidget(self.change_mode)
 
         # Кнопка справки
-        self.pushButton = QtWidgets.QPushButton(self.layoutWidget)
-        self.verticalLayout.addWidget(self.pushButton)
+        self.help_button = QtWidgets.QPushButton(self.layoutWidget)
+        self.verticalLayout.addWidget(self.help_button)
+        self.help_button.clicked.connect(self.help_window_show)
 
         # Вывыод изображения видеокамеры
         self.camera_out = QtWidgets.QLabel(self.layoutWidget)
@@ -131,7 +133,7 @@ class Window(QMainWindow):
         self.Camera.change_translator.connect(self.set_translator_image)
         self.Camera.change_graph.connect(self.set_graph_value)
         self.Camera.change_mode.connect(self.set_mode)
-        #self.Camera.change_xy.connect(self.set_xy)
+        self.Camera.change_xy.connect(self.set_xy)
         self.Camera.start()
 
         # Спейсер для правого меню
@@ -148,7 +150,11 @@ class Window(QMainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "HandPlot"))
         self.build_mode.setText(_translate("MainWindow", "Режим построения"))
         self.change_mode.setText(_translate("MainWindow", "Режим изменения"))
-        self.pushButton.setText(_translate("MainWindow", "Справка"))
+        self.help_button.setText(_translate("MainWindow", "Справка"))
+
+    def help_window_show(self):
+        self.help = Help_Window()
+        self.help.show()
 
     @QtCore.pyqtSlot(QImage)
     def set_translator_image(self, translator_image):
@@ -252,7 +258,7 @@ class Window(QMainWindow):
 
             ax.plot(x, ((x-dist_x)**2)+dist_y, label=tmp_str)
             ax.legend()
-            # refresh canvas
+            self.retranslate_mathtext(self.graph_signal, dist_x, dist_y, 1)
             self.canvas.draw()
 
     def clear_canvas(self):
