@@ -5,6 +5,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPalette, QColor, QImage, QPixmap
+from PyQt5.QtCore import pyqtSignal
 from CamThread import *
 from labeler import *
 from HelpWindow import *
@@ -18,6 +19,7 @@ class MplCanvas(FigureCanvas):
         super(MplCanvas, self).__init__(figure)
 
 class Window(QMainWindow):
+    camera_ind = pyqtSignal(int)
     def __init__(self):
         super().__init__()
         # список рабочих видеокамер
@@ -102,6 +104,7 @@ class Window(QMainWindow):
         self.camera_list = QtWidgets.QComboBox(self.layoutWidget)
         self.camera_list.setMinimumSize(QtCore.QSize(640, 20))
         self.camera_list.addItems(self.working_ports)
+        self.camera_list.activated[int].connect(self.camera_index)
         self.verticalLayout.addWidget(self.camera_list)
 
 
@@ -181,6 +184,9 @@ class Window(QMainWindow):
             self.camera_aviable = False
             self.error = Error_Window()
             self.error.show()
+
+    def camera_index(self, camera_number):
+        self.camera_ind.emit(camera_number)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

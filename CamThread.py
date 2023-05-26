@@ -1,3 +1,4 @@
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QTime
 from PyQt5.QtGui import QImage, QPixmap
 import PyQt5.QtGui
@@ -20,6 +21,7 @@ class handDetector(QThread):
       # Камера
       self.cap1 = None
       self.mode = mode
+      self.camera_index = 0
       # Количество рук, которые можно одновременно отслеживать
       self.maxHands = maxHands
       # Нижний порог подтверждения руки
@@ -43,6 +45,10 @@ class handDetector(QThread):
       self.xy_flag = []
       # Флаг для смены режима - по умолчанию построение
       self.flag = True
+
+   @QtCore.pyqtSlot(int)
+   def set_camera_index(self, camera_number):
+      self.camera_index = camera_number
 
    # Модель находит на каждом кадре скелет руки и возвращает изображение с нарисованным скелетом
    def find_hands(self, img, draw=True):
@@ -183,7 +189,7 @@ class handDetector(QThread):
 
    # Начало работы видеокамеры
    def start_capture(self):
-      self.cap1 = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+      self.cap1 = cv2.VideoCapture(self.camera_index, cv2.CAP_DSHOW)
 
    # Конец работы видеокамеры
    def stop_capture(self):
