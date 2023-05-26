@@ -153,13 +153,13 @@ class handDetector(QThread):
                      tdistance_x = self.x_step * 2
 
                   if -150 > distance_y >= -220:
-                     tdistance_y = -self.y_step * 2
-                  elif -70 > distance_y >= -150:
-                     tdistance_y = -self.y_step
-                  elif 150 >= distance_y > 70:
-                     tdistance_y = self.y_step
-                  elif 220 >= distance_y > 150:
                      tdistance_y = self.y_step * 2
+                  elif -70 > distance_y >= -150:
+                     tdistance_y = self.y_step
+                  elif 150 >= distance_y > 70:
+                     tdistance_y = -self.y_step
+                  elif 220 >= distance_y > 150:
+                     tdistance_y = -self.y_step * 2
 
                   self.change_xy.emit(tdistance_x, tdistance_y)
 
