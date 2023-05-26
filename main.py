@@ -280,7 +280,11 @@ class Window(QMainWindow):
             ax.set_xlabel('Ось абсцисс')
             ax.set_ylabel('Ось ординат')
             ax.grid()
+            ax.axvline(x=0, color='black')
+            ax.axhline(y=0, color='black')
             ax.plot(x, x, label='y=x')
+            ax.set_xlim(-10, 10)
+            ax.set_ylim(-20, 100)
             ax.legend()
             self.retranslate_mathtext(signal, 0, 0, 1)
             self.canvas.draw()
@@ -292,7 +296,11 @@ class Window(QMainWindow):
             ax.set_xlabel('Ось абсцисс')
             ax.set_ylabel('Ось ординат')
             ax.grid()
+            ax.axvline(x=0, color='black')
+            ax.axhline(y=0, color='black')
             ax.plot(x, x ** 2, label='y=x*x')
+            ax.set_xlim(-10, 10)
+            ax.set_ylim(-20, 100)
             ax.legend()
             # refresh canvas
             self.retranslate_mathtext(signal, 0, 0, 1)
@@ -305,7 +313,11 @@ class Window(QMainWindow):
             ax.set_xlabel('Ось абсцисс')
             ax.set_ylabel('Ось ординат')
             ax.grid()
+            ax.axvline(x=0, color='black')
+            ax.axhline(y=0, color='black')
             ax.plot(x, x ** 3, 's-')
+            ax.set_xlim(-10, 10)
+            ax.set_ylim(-20, 100)
             ax.legend()
             self.retranslate_mathtext(signal, 0, 0, 1)
             self.canvas.draw()
@@ -319,18 +331,12 @@ class Window(QMainWindow):
             ax.set_ylabel('Ось ординат')
             ax.set_title('y = x*x')
             ax.grid()
+            ax.axvline(x=0, color='black')
+            ax.axhline(y=0, color='black')
             ax.plot(x, x ** 2, label='y=x*x')
-
-            if dist_x > 0:
-                tmp_str = 'y = ' + str(dist_y) + ' + (x + ' + str(dist_x) + ')^2'
-            elif dist_x < 0:
-                tmp_str = 'y = ' + str(dist_y) + ' + (x ' + str(dist_x) + ')^2'
-            elif dist_x == 0 and dist_y == 0:
-                tmp_str = 'y = x^2'
-            else:
-                tmp_str = 'y =' + str(dist_y) + ' + x^2'
-
-            ax.plot(x, ((x-dist_x)**2)+dist_y, label=tmp_str)
+            ax.plot(x, ((x-dist_x)**2)+dist_y)
+            ax.set_xlim(-10, 10)
+            ax.set_ylim(-20, 100)
             ax.legend()
             self.retranslate_mathtext(self.graph_signal, dist_x, dist_y, 1)
             self.canvas.draw()
