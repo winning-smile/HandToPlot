@@ -20,17 +20,26 @@ class MplCanvas(FigureCanvas):
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
+        # список рабочих видеокамер
         self.working_ports = []
+        # флаг рабочей видеокамеры
+        self.camera_aviable = True
+        # проверка рабочих видеокамер
         self.list_ports()
         self.text = ""
-        self.setupUi(self)
-        self.showMaximized()
-        # Цвета для кнопок
-        global palette_red, palette_green
-        palette_red = QPalette()
-        palette_green = QPalette()
-        palette_red.setColor(QPalette.Window, (QColor(255, 0, 0, 127)))
-        palette_green.setColor(QPalette.Window, (QColor(0, 255, 0, 127)))
+        self.camera_handler()
+
+        if self.camera_aviable:
+            # инициализируем интерфейс
+            self.setupUi(self)
+            self.showMaximized()
+
+            # Цвета для кнопок
+            global palette_red, palette_green
+            palette_red = QPalette()
+            palette_green = QPalette()
+            palette_red.setColor(QPalette.Window, (QColor(255, 0, 0, 127)))
+            palette_green.setColor(QPalette.Window, (QColor(0, 255, 0, 127)))
 
 
     def setupUi(self, MainWindow):
@@ -166,6 +175,12 @@ class Window(QMainWindow):
                 if is_reading:
                     self.working_ports.append("Видеокамера " + str(dev_port))
             dev_port += 1
+
+    def camera_handler(self):
+        if not self.working_ports:
+            self.camera_aviable = False
+            self.error = Error_Window()
+            self.error.show()
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
