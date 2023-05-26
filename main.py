@@ -19,7 +19,6 @@ class MplCanvas(FigureCanvas):
         super(MplCanvas, self).__init__(figure)
 
 class Window(QMainWindow):
-    camera_ind = pyqtSignal(int)
     def __init__(self):
         super().__init__()
         # список рабочих видеокамер
@@ -94,7 +93,7 @@ class Window(QMainWindow):
 
         # Виджет правого меню
         self.layoutWidget = QtWidgets.QWidget(self.centralwidget)
-        self.layoutWidget.setGeometry(QtCore.QRect(1270, 260, 640, 859))
+        self.layoutWidget.setGeometry(QtCore.QRect(1270, 100, 640, 859))
 
         # Сетка правого меню
         self.verticalLayout = QtWidgets.QVBoxLayout(self.layoutWidget)
@@ -107,6 +106,37 @@ class Window(QMainWindow):
         self.camera_list.activated[int].connect(self.camera_index)
         self.verticalLayout.addWidget(self.camera_list)
 
+        # Слайдер шаг по x
+        self.x_slider_label = QtWidgets.QLabel(self.layoutWidget)
+        self.x_slider_label.setText("Шаг по оси абсцисс: 1")
+        self.x_slider_label.setMinimumSize(QtCore.QSize(640, 40))
+        self.verticalLayout.addWidget(self.x_slider_label)
+
+        self.x_slider = QtWidgets.QSlider(self.layoutWidget)
+        self.x_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.x_slider.setMinimumSize(QtCore.QSize(640, 40))
+        self.x_slider.setMinimum(1)
+        self.x_slider.setMaximum(50)
+        self.x_slider.setTickPosition(QtWidgets.QSlider.TicksBelow)
+        self.x_slider.setTickInterval(4)
+        self.x_slider.valueChanged.connect(self.x_step)
+        self.verticalLayout.addWidget(self.x_slider)
+
+        # Слайдер шаг по y
+        self.y_slider_label = QtWidgets.QLabel(self.layoutWidget)
+        self.y_slider_label.setText("Шаг по оси ординат: 1")
+        self.y_slider_label.setMinimumSize(QtCore.QSize(640, 40))
+        self.verticalLayout.addWidget(self.y_slider_label)
+
+        self.y_slider = QtWidgets.QSlider(self.layoutWidget)
+        self.y_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.y_slider.setMinimumSize(QtCore.QSize(640, 40))
+        self.y_slider.setMinimum(1)
+        self.y_slider.setMaximum(50)
+        self.y_slider.setTickPosition(QtWidgets.QSlider.TicksBelow)
+        self.y_slider.setTickInterval(4)
+        self.y_slider.valueChanged.connect(self.y_step)
+        self.verticalLayout.addWidget(self.y_slider)
 
         # Индикатор режима построения
         self.build_mode = QtWidgets.QLabel(self.layoutWidget)
@@ -158,7 +188,7 @@ class Window(QMainWindow):
         self.Camera.change_xy.connect(self.set_xy)
         self.Camera.start()
 
-        # Спейсер для правого меню
+        #Спейсер для правого меню
         spacerItem = QtWidgets.QSpacerItem(20, 250, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.verticalLayout.addItem(spacerItem)
 
@@ -186,7 +216,7 @@ class Window(QMainWindow):
             self.error.show()
 
     def camera_index(self, camera_number):
-        self.camera_ind.emit(camera_number)
+        self.Camera.camera_index = camera_number - 1
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -198,6 +228,14 @@ class Window(QMainWindow):
     def help_window_show(self):
         self.help = Help_Window()
         self.help.show()
+
+    def x_step(self, value):
+        self.x_slider_label.setText(f"Шаг по оси абсцисс: {value}")
+        self.Camera.x_step = value
+
+    def y_step(self, value):
+        self.y_slider_label.setText(f"Шаг по оси ординат: {value}")
+        self.Camera.y_step = value
 
     @QtCore.pyqtSlot(QImage)
     def set_translator_image(self, translator_image):

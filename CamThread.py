@@ -22,6 +22,9 @@ class handDetector(QThread):
       self.cap1 = None
       self.mode = mode
       self.camera_index = 0
+      # Шаги по x,y
+      self.x_step = 1
+      self.y_step = 1
       # Количество рук, которые можно одновременно отслеживать
       self.maxHands = maxHands
       # Нижний порог подтверждения руки
@@ -45,10 +48,6 @@ class handDetector(QThread):
       self.xy_flag = []
       # Флаг для смены режима - по умолчанию построение
       self.flag = True
-
-   @QtCore.pyqtSlot(int)
-   def set_camera_index(self, camera_number):
-      self.camera_index = camera_number
 
    # Модель находит на каждом кадре скелет руки и возвращает изображение с нарисованным скелетом
    def find_hands(self, img, draw=True):
@@ -135,7 +134,6 @@ class handDetector(QThread):
                   self.refresh_flags()
                   self.change_graph.emit("quadro")
 
-         # TODO: increase/decrease graph
          else:
             if (math.hypot(lmlist[4][1] - lmlist[8][1], lmlist[4][2] - lmlist[8][2]) < 15) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]) and(lmlist[8][2] < lmlist[12][2]) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]):
                self.xy_flag.append(0)
@@ -146,25 +144,24 @@ class handDetector(QThread):
                   tdistance_x, tdistance_y = 0, 0
 
                   if -220 > distance_x >= -330:
-                     tdistance_x = -10
+                     tdistance_x = -self.x_step * 2
                   elif -110 > distance_x >= -220:
-                     tdistance_x = -5
+                     tdistance_x = -self.x_step
                   elif 220 >= distance_x > 110:
-                     tdistance_x = 5
+                     tdistance_x = self.x_step
                   elif 330 >= distance_x > 220:
-                     tdistance_x = 10
+                     tdistance_x = self.x_step * 2
 
                   if -150 > distance_y >= -220:
-                     tdistance_y = 10
+                     tdistance_y = -self.y_step * 2
                   elif -70 > distance_y >= -150:
-                     tdistance_y = 5
+                     tdistance_y = -self.y_step
                   elif 150 >= distance_y > 70:
-                     tdistance_y = -5
+                     tdistance_y = self.y_step
                   elif 220 >= distance_y > 150:
-                     tdistance_y = -10
+                     tdistance_y = self.y_step * 2
 
                   self.change_xy.emit(tdistance_x, tdistance_y)
-
 
    # Транслятор движений руки с канала видеокамеры на верхний слой
    def translator(self, lmlist):
