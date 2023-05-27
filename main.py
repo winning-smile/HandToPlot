@@ -4,7 +4,7 @@ from PyQt5 import QtWebEngineWidgets
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QPalette, QColor, QImage, QPixmap
+from PyQt5.QtGui import QPalette, QColor, QImage, QPixmap, QIcon
 from PyQt5.QtCore import pyqtSignal
 from CamThread import *
 from labeler import *
@@ -21,6 +21,7 @@ class MplCanvas(FigureCanvas):
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowIcon(QIcon('img/icon.png'))
         # список рабочих видеокамер
         self.working_ports = []
         # флаг рабочей видеокамеры
@@ -41,7 +42,6 @@ class Window(QMainWindow):
             palette_green = QPalette()
             palette_red.setColor(QPalette.Window, (QColor(255, 0, 0, 127)))
             palette_green.setColor(QPalette.Window, (QColor(0, 255, 0, 127)))
-
 
     def setupUi(self, MainWindow):
         # Настройки главного окна
@@ -282,9 +282,9 @@ class Window(QMainWindow):
             ax.grid()
             ax.axvline(x=0, color='black')
             ax.axhline(y=0, color='black')
-            ax.plot(x, x, label='y=x')
+            ax.plot(x, x, label='f(x) = x')
             ax.set_xlim(-10, 10)
-            ax.set_ylim(-20, 100)
+            ax.set_ylim(-20, 20)
             ax.legend()
             self.retranslate_mathtext(signal, 0, 0, 1)
             self.canvas.draw()
@@ -298,24 +298,23 @@ class Window(QMainWindow):
             ax.grid()
             ax.axvline(x=0, color='black')
             ax.axhline(y=0, color='black')
-            ax.plot(x, x ** 2, label='y=x*x')
+            ax.plot(x, x ** 2, label='f(x) = x^2')
             ax.set_xlim(-10, 10)
             ax.set_ylim(-20, 100)
             ax.legend()
-            # refresh canvas
             self.retranslate_mathtext(signal, 0, 0, 1)
             self.canvas.draw()
 
         if signal == "quadro":
-            self.figure.clear()
+            self.canvas.figure.clear()
             x = np.arange(-10, 11, 1)
-            ax = self.figure.add_subplot(111)
+            ax = self.canvas.figure.add_subplot(111)
             ax.set_xlabel('Ось абсцисс')
             ax.set_ylabel('Ось ординат')
             ax.grid()
             ax.axvline(x=0, color='black')
             ax.axhline(y=0, color='black')
-            ax.plot(x, x ** 3, 's-')
+            ax.plot(x, x ** 3, label="f(x) = x^3")
             ax.set_xlim(-10, 10)
             ax.set_ylim(-20, 100)
             ax.legend()

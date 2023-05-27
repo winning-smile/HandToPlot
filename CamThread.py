@@ -37,7 +37,7 @@ class handDetector(QThread):
       # Сигнал для передачи данных, о том какой график строить
       self.signal = "clear"
       # Картинка, на которую транслируется движения скелета руки
-      self.back = cv2.imread('back.png', cv2.IMREAD_UNCHANGED)
+      self.back = cv2.imread('img/back.png', cv2.IMREAD_UNCHANGED)
       # Буффер для смены режима
       self.t = []
       # Буфферы для смены графиков
