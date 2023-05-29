@@ -8,11 +8,11 @@ class Help_Window(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Справка")
-        self.resize(1400, 800)
+        self.resize(1200, 1000)
         self.tab_widget =TabWidget(self)
         self.setCentralWidget(self.tab_widget)
 
-class TabWidget(QtWidgets.QWidget):
+class TabWidget(QWidget):
     def __init__(self, parent):
         super(QtWidgets.QWidget, self).__init__(parent)
         self.layout = QVBoxLayout(self)
@@ -39,126 +39,85 @@ class TabWidget(QtWidgets.QWidget):
         self.tabs.addTab(self.tab7, "7")
 
         # Главная закладка
-        self.main_tab.layout = QVBoxLayout(self)
-        self.main_tab.layout.setContentsMargins(0, 0, 0, 0)
-        self.main_tab.layout.setSpacing(0)
-
-        self.main_tab_text = QLabel()
+        self.main_tab_text = QLabel(self.main_tab)
         self.main_tab_text.setText("Для получения справочной информации о полях, представленных на рисунке ниже, перейдите на соответствующую закладку.")
         self.main_tab_text.setFont(QFont('Arial', 16))
-        self.main_tab.layout.addWidget(self.main_tab_text)
+        self.main_tab_text.setGeometry(QtCore.QRect(10, 10, 1000, 50))
+        self.main_tab_text.setWordWrap(True)
 
-        self.main_tab_img = QLabel()
+        self.main_tab_img = QLabel(self.main_tab)
         pixmap = QPixmap('img/info.jpg')
         self.main_tab_img.setPixmap(pixmap)
-        self.main_tab.layout.addWidget(self.main_tab_img)
-
-        self.main_tab.setLayout(self.main_tab.layout)
+        self.main_tab_img.move(10, 100)
 
         # Первая закладка
-        self.tab1.layout = QVBoxLayout(self)
-        self.tab1.layout.setContentsMargins(0, 0, 0, 0)
-        self.tab1.layout.setSpacing(0)
-
-        self.tab1_text = QLabel()
+        self.tab1_text = QLabel(self.tab1)
         self.tab1_text.setText("Данное поле предназначено для вывода зависимости f(x) = x для графиков, которые изображены в поле под номером 2. Ниже представлены примеры, как может выглядеть данное поле.")
         self.tab1_text.setFont(QFont('Arial', 16))
-        self.tab1.layout.addWidget(self.tab1_text)
+        self.tab1_text.setGeometry(QtCore.QRect(10, 10, 1000, 50))
+        self.tab1_text.setWordWrap(True)
 
-        self.tab1_img = QLabel()
+        self.tab1_img = QLabel(self.tab1)
         pixmap = QPixmap('img/tab1img.jpg')
         self.tab1_img.setPixmap(pixmap)
-        self.tab1.layout.addWidget(self.tab1_img)
-
-        self.tab1.setLayout(self.tab1.layout)
+        self.tab1_img.move(10, 100)
 
         # Вторая закладка
-        self.tab2.layout = QVBoxLayout(self)
-        self.tab2.layout.setContentsMargins(0, 0, 0, 0)
-        self.tab2.layout.setSpacing(0)
-
-        self.tab2_text = QLabel()
+        self.tab2_text = QLabel(self.tab2)
         self.tab2_text.setText("Данное поле предназначено для вывода графика выбранной пользователем функции Ниже представлен пример, как может выглядеть данное поле.")
         self.tab2_text.setFont(QFont('Arial', 16))
-        self.tab2.layout.addWidget(self.tab2_text)
+        self.tab2_text.setGeometry(QtCore.QRect(10, 10, 1000, 50))
+        self.tab2_text.setWordWrap(True)
 
-        self.tab2_img = QLabel()
+        self.tab2_img = QLabel(self.tab2)
         pixmap = QPixmap('img/tab2img.jpg')
         self.tab2_img.setPixmap(pixmap)
-        self.tab2.layout.addWidget(self.tab2_img)
-
-        self.tab2.setLayout(self.tab2.layout)
+        self.tab2_img.move(10, 100)
 
         # Третья закладка
-        self.tab3.layout = QVBoxLayout(self)
-        self.tab3.layout.setContentsMargins(0, 0, 0, 0)
-        self.tab3.layout.setSpacing(0)
-
-        self.tab3_text = QLabel()
+        self.tab3_text = QLabel(self.tab3)
         self.tab3_text.setText("Данное поле предназначено для выбора видеокамеры, с которой пользователь хочет работать.")
         self.tab3_text.setFont(QFont('Arial', 16))
-        self.tab3.layout.addWidget(self.tab3_text)
-
-        self.tab3.setLayout(self.tab3.layout)
+        self.tab3_text.setGeometry(QtCore.QRect(10, 10, 1000, 50))
+        self.tab3_text.setWordWrap(True)
 
         # Четвёртая закладка
-        self.tab4.layout = QVBoxLayout(self)
-        self.tab4.layout.setContentsMargins(0, 0, 0, 0)
-        self.tab4.layout.setSpacing(0)
-
-        self.tab4_text = QLabel()
+        self.tab4_text = QLabel(self.tab4)
         self.tab4_text.setText("Данное поле предназначено для выбора шага по оси абсции/ординат, на который будет происходить смещение графика при изменении.")
         self.tab4_text.setFont(QFont('Arial', 16))
-        self.tab4.layout.addWidget(self.tab4_text)
-
-        self.tab4.setLayout(self.tab4.layout)
+        self.tab4_text.setGeometry(QtCore.QRect(10, 10, 1000, 50))
+        self.tab4_text.setWordWrap(True)
 
         # Пятая закладка
-        self.tab5.layout = QVBoxLayout(self)
-        self.tab5.layout.setContentsMargins(0, 0, 0, 0)
-        self.tab5.layout.setSpacing(0)
-
-        self.tab5_text = QLabel()
+        self.tab5_text = QLabel(self.tab5)
         self.tab5_text.setText("Данное поле предназначено для индикации режима работы, в котором находится приложение. Для того чтобы сменить режим, необходимо показать жест представленный ниже.")
         self.tab5_text.setFont(QFont('Arial', 16))
-        self.tab5.layout.addWidget(self.tab5_text)
+        self.tab5_text.setGeometry(QtCore.QRect(10, 10, 1000, 50))
+        self.tab5_text.setWordWrap(True)
 
-        self.tab5_img = QLabel()
+        self.tab5_img = QLabel(self.tab5)
         pixmap = QPixmap('img/tab5img.jpg')
         self.tab5_img.setPixmap(pixmap)
-        self.tab5.layout.addWidget(self.tab5_img)
-
-        self.tab5.setLayout(self.tab5.layout)
+        self.tab5_img.move(10, 100)
 
         # Шестая закладка
-        self.tab6.layout = QVBoxLayout(self)
-        self.tab6.layout.setContentsMargins(0, 0, 0, 0)
-        self.tab6.layout.setSpacing(0)
-
-        self.tab6_text = QLabel()
+        self.tab6_text = QLabel(self.tab6)
         self.tab6_text.setText("Данное поле предназначено для получения справочной информации о работе с приложением.")
         self.tab6_text.setFont(QFont('Arial', 16))
-        self.tab6.layout.addWidget(self.tab6_text)
-
-        self.tab6.setLayout(self.tab6.layout)
+        self.tab6_text.setGeometry(QtCore.QRect(10, 10, 1000, 50))
+        self.tab6_text.setWordWrap(True)
 
         # Седьмая закладка
-        self.tab7.layout = QVBoxLayout(self)
-        self.tab7.layout.setContentsMargins(0, 0, 0, 0)
-        self.tab7.layout.setSpacing(0)
-
-        self.tab7_text = QLabel()
+        self.tab7_text = QLabel(self.tab7)
         self.tab7_text.setText("Данное поле предназначено вывода изображения с выбранной пользователем видеокамеры.")
         self.tab7_text.setFont(QFont('Arial', 16))
-        self.tab7.layout.addWidget(self.tab7_text)
+        self.tab7_text.setGeometry(QtCore.QRect(10, 10, 1000, 50))
+        self.tab7_text.setWordWrap(True)
 
-        self.tab7_img = QLabel()
+        self.tab7_img = QLabel(self.tab7)
         pixmap = QPixmap('img/tab7img.jpg')
         self.tab7_img.setPixmap(pixmap)
-        self.tab7.layout.addWidget(self.tab7_img)
-
-        self.tab7.setLayout(self.tab7.layout)
-
+        self.tab7_img.move(10, 100)
 
         # Добавляем закладки в виджет
         self.layout.addWidget(self.tabs)
