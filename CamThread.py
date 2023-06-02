@@ -15,6 +15,7 @@ class handDetector(QThread):
    change_graph = pyqtSignal(str)
    change_mode = pyqtSignal(bool)
    change_xy = pyqtSignal(int, int)
+   change_scale = pyqtSignal(float)
 
    def __init__(self, mode=False, maxHands=1, detectionCon=1, trackCon=0.5):
       super().__init__()
@@ -46,6 +47,7 @@ class handDetector(QThread):
       self.quadro = []
       self.clear_flag = []
       self.xy_flag = []
+      self.scale_flag = []
       # Флаг для смены режима - по умолчанию построение
       self.flag = True
 
@@ -89,6 +91,7 @@ class handDetector(QThread):
       self.t.clear()
       self.clear_flag.clear()
       self.xy_flag.clear()
+      self.scale_flag.clear()
 
    # Функция детекции жестов для построения графиков
    def on_build(self, lmlist):
@@ -135,7 +138,7 @@ class handDetector(QThread):
                   self.change_graph.emit("quadro")
 
          else:
-            if (math.hypot(lmlist[4][1] - lmlist[8][1], lmlist[4][2] - lmlist[8][2]) < 15) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]) and(lmlist[8][2] < lmlist[12][2]) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]):
+            if (math.hypot(lmlist[4][1] - lmlist[8][1], lmlist[4][2] - lmlist[8][2]) < 15) and (lmlist[4][2] < lmlist[12][2]) and (lmlist[4][2] < lmlist[16][2]) and (lmlist[4][2] < lmlist[20][2]) and (lmlist[8][2] < lmlist[12][2]) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[8][1] < lmlist[12][1]) and (lmlist[8][1] < lmlist[16][1]) and (lmlist[8][1] < lmlist[20][1]):
                self.xy_flag.append(0)
                if len(self.xy_flag) >= 10:
                   self.refresh_flags()
@@ -163,6 +166,16 @@ class handDetector(QThread):
 
                   self.change_xy.emit(tdistance_x, tdistance_y)
 
+            if (np.abs(lmlist[8][2] - lmlist[5][2]) < 20 ) and (lmlist[8][2] < lmlist[4][2]) and (lmlist[8][2] < lmlist[12][2]) and (lmlist[8][2] < lmlist[16][2]) and (lmlist[8][2] < lmlist[20][2]) and (lmlist[8][1] > lmlist[4][1]) and (lmlist[8][1] > lmlist[12][1]) and (lmlist[8][1] > lmlist[16][1]) and (lmlist[8][1] > lmlist[20][1]):
+               self.scale_flag.append(0)
+               if len(self.scale_flag) >= 30:
+                  print(lmlist[8][2])
+                  self.refresh_flags()
+                  scale = 2
+                  if lmlist[8][2] < 250:
+                     self.change_scale.emit(scale)
+                  else:
+                     self.change_scale.emit(1/scale)
    # Транслятор движений руки с канала видеокамеры на верхний слой
    def translator(self, lmlist):
       # Делаем копию оригинального фона

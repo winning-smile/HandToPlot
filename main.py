@@ -30,6 +30,8 @@ class Window(QMainWindow):
         self.list_ports()
         self.text = ""
         self.camera_handler()
+        self.cur_x = 0
+        self.cur_y = 0
 
         if self.camera_aviable:
             # инициализируем интерфейс
@@ -186,6 +188,7 @@ class Window(QMainWindow):
         self.Camera.change_graph.connect(self.set_graph_value)
         self.Camera.change_mode.connect(self.set_mode)
         self.Camera.change_xy.connect(self.set_xy)
+        self.Camera.change_scale.connect(self.set_scale)
         self.Camera.start()
 
         #Спейсер для правого меню
@@ -265,7 +268,13 @@ class Window(QMainWindow):
 
     @QtCore.pyqtSlot(int, int)
     def set_xy(self, x_value, y_value):
-        self.plot_update(x_value, y_value)
+        self.cur_x = x_value
+        self.cur_y = y_value
+        self.plot_update(x_value, y_value, 1)
+
+    @QtCore.pyqtSlot(float)
+    def set_scale(self, scale_value):
+        self.plot_update(self.cur_x, self.cur_y, scale_value)
 
     def retranslate_mathtext(self, signal, x, y, z):
         self.text = mathtext_update(signal, x, y, z)
@@ -321,7 +330,25 @@ class Window(QMainWindow):
             self.retranslate_mathtext(signal, 0, 0, 1)
             self.canvas.draw()
 
-    def plot_update(self, dist_x, dist_y):
+    def plot_update(self, dist_x, dist_y, scale):
+        if self.graph_signal == "line":
+            self.canvas.figure.clear()
+            x = np.arange(-10-dist_x, 11+dist_x, 1)
+            ax = self.canvas.figure.add_subplot(111)
+            ax.set_xlabel('Ось абсцисс')
+            ax.set_ylabel('Ось ординат')
+            ax.set_title('y = x*x')
+            ax.grid()
+            ax.axvline(x=0, color='black')
+            ax.axhline(y=0, color='black')
+            ax.plot(x, x, label='f(x) = x')
+            ax.plot(x, scale*(x-dist_x+dist_y))
+            ax.set_xlim(-10, 10)
+            ax.set_ylim(-20, 100)
+            ax.legend()
+            self.retranslate_mathtext(self.graph_signal, dist_x, dist_y, scale)
+            self.canvas.draw()
+
         if self.graph_signal == "cubic":
             self.canvas.figure.clear()
             x = np.arange(-10-dist_x, 11+dist_x, 1)
@@ -332,12 +359,30 @@ class Window(QMainWindow):
             ax.grid()
             ax.axvline(x=0, color='black')
             ax.axhline(y=0, color='black')
-            ax.plot(x, x ** 2, label='y=x*x')
-            ax.plot(x, ((x-dist_x)**2)+dist_y)
+            ax.plot(x, x ** 2, label='f(x) = x^2')
+            ax.plot(x, scale*(((x-dist_x)**2)+dist_y))
             ax.set_xlim(-10, 10)
             ax.set_ylim(-20, 100)
             ax.legend()
-            self.retranslate_mathtext(self.graph_signal, dist_x, dist_y, 1)
+            self.retranslate_mathtext(self.graph_signal, dist_x, dist_y, scale)
+            self.canvas.draw()
+
+        if self.graph_signal == "quadro":
+            self.canvas.figure.clear()
+            x = np.arange(-10-dist_x, 11+dist_x, 1)
+            ax = self.canvas.figure.add_subplot(111)
+            ax.set_xlabel('Ось абсцисс')
+            ax.set_ylabel('Ось ординат')
+            ax.set_title('y = x*x')
+            ax.grid()
+            ax.axvline(x=0, color='black')
+            ax.axhline(y=0, color='black')
+            ax.plot(x, x ** 3, label='f(x) = x^3')
+            ax.plot(x, scale*(((x-dist_x)**3)+dist_y))
+            ax.set_xlim(-10, 10)
+            ax.set_ylim(-20, 100)
+            ax.legend()
+            self.retranslate_mathtext(self.graph_signal, dist_x, dist_y, scale)
             self.canvas.draw()
 
     def clear_canvas(self):
